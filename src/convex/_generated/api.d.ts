@@ -13,9 +13,12 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as aiVerification from "../aiVerification.js";
 import type * as auth_emailOtp from "../auth/emailOtp.js";
 import type * as auth from "../auth.js";
+import type * as contracts from "../contracts.js";
 import type * as http from "../http.js";
+import type * as milestones from "../milestones.js";
 import type * as users from "../users.js";
 
 /**
@@ -27,9 +30,12 @@ import type * as users from "../users.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  aiVerification: typeof aiVerification;
   "auth/emailOtp": typeof auth_emailOtp;
   auth: typeof auth;
+  contracts: typeof contracts;
   http: typeof http;
+  milestones: typeof milestones;
   users: typeof users;
 }>;
 export declare const api: FilterApi<

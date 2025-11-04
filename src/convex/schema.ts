@@ -2,7 +2,6 @@ import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { Infer, v } from "convex/values";
 
-// default user roles. can add / remove based on the project as needed
 export const ROLES = {
   ADMIN: "admin",
   USER: "user",
@@ -18,30 +17,69 @@ export type Role = Infer<typeof roleValidator>;
 
 const schema = defineSchema(
   {
-    // default auth tables using convex auth.
-    ...authTables, // do not remove or modify
+    ...authTables,
 
-    // the users table is the default users table that is brought in by the authTables
     users: defineTable({
-      name: v.optional(v.string()), // name of the user. do not remove
-      image: v.optional(v.string()), // image of the user. do not remove
-      email: v.optional(v.string()), // email of the user. do not remove
-      emailVerificationTime: v.optional(v.number()), // email verification time. do not remove
-      isAnonymous: v.optional(v.boolean()), // is the user anonymous. do not remove
+      name: v.optional(v.string()),
+      image: v.optional(v.string()),
+      email: v.optional(v.string()),
+      emailVerificationTime: v.optional(v.number()),
+      isAnonymous: v.optional(v.boolean()),
+      role: v.optional(roleValidator),
+    }).index("email", ["email"]),
 
-      role: v.optional(roleValidator), // role of the user. do not remove
-    }).index("email", ["email"]), // index for the email. do not remove or modify
+    contracts: defineTable({
+      title: v.string(),
+      description: v.string(),
+      clientId: v.id("users"),
+      freelancerId: v.id("users"),
+      totalAmount: v.number(),
+      currentAmount: v.number(),
+      currency: v.string(),
+      status: v.union(
+        v.literal("draft"),
+        v.literal("active"),
+        v.literal("completed"),
+        v.literal("disputed"),
+        v.literal("cancelled")
+      ),
+      fundingStatus: v.union(
+        v.literal("unfunded"),
+        v.literal("partially_funded"),
+        v.literal("fully_funded")
+      ),
+      createdBy: v.id("users"),
+    })
+      .index("by_client", ["clientId"])
+      .index("by_freelancer", ["freelancerId"]),
 
-    // add other tables here
-
-    // tableName: defineTable({
-    //   ...
-    //   // table fields
-    // }).index("by_field", ["field"])
+    milestones: defineTable({
+      contractId: v.id("contracts"),
+      title: v.string(),
+      description: v.string(),
+      amount: v.number(),
+      dueDate: v.optional(v.number()),
+      status: v.union(
+        v.literal("pending"),
+        v.literal("in_progress"),
+        v.literal("submitted"),
+        v.literal("revision_requested"),
+        v.literal("approved"),
+        v.literal("paid")
+      ),
+      deliverableUrl: v.optional(v.string()),
+      submittedAt: v.optional(v.number()),
+      approvedAt: v.optional(v.number()),
+      revisionNotes: v.optional(v.string()),
+      aiVerificationStatus: v.optional(
+        v.union(v.literal("pending"), v.literal("passed"), v.literal("failed"))
+      ),
+      aiVerificationResult: v.optional(v.string()),
+    }).index("by_contract", ["contractId"]),
   },
   {
     schemaValidation: false,
-  },
+  }
 );
 
 export default schema;
