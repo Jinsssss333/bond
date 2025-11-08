@@ -21,6 +21,7 @@ import type * as disputes from "../disputes.js";
 import type * as escrows from "../escrows.js";
 import type * as http from "../http.js";
 import type * as milestones from "../milestones.js";
+import type * as seedData from "../seedData.js";
 import type * as users from "../users.js";
 
 /**
@@ -40,6 +41,7 @@ declare const fullApi: ApiFromModules<{
   escrows: typeof escrows;
   http: typeof http;
   milestones: typeof milestones;
+  seedData: typeof seedData;
   users: typeof users;
 }>;
 export declare const api: FilterApi<

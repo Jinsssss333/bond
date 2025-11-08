@@ -56,6 +56,7 @@ export default function ClientDashboard() {
 
   const activeProjects = projects?.filter((p) => p.status === "active") || [];
   const totalBudget = projects?.reduce((sum, p) => sum + p.totalBudget, 0) || 0;
+  const openDisputes = projects?.filter((p) => p.status === "disputed").length || 0;
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
@@ -243,7 +244,7 @@ export default function ClientDashboard() {
                     <AlertCircle className="h-4 w-4 text-blue-400" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold">0</div>
+                    <div className="text-3xl font-bold">{openDisputes}</div>
                   </CardContent>
                 </Card>
               </div>
