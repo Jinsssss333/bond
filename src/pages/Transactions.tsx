@@ -19,15 +19,15 @@ export default function Transactions() {
   const projects = user?.role === "client" ? clientProjects : freelancerProjects;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur">
+    <div className="min-h-screen bg-background">
+      <header className="border-b">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <LogoDropdown />
             <h1 className="text-2xl font-bold tracking-tight">Transactions</h1>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-400">{user?.email}</span>
+            <span className="text-sm text-muted-foreground">{user?.email}</span>
             <Button variant="outline" size="sm" onClick={() => {
               signOut();
               navigate("/");
@@ -48,20 +48,20 @@ export default function Transactions() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-bold">Transaction History</h2>
-              <p className="text-slate-400 mt-1">View all your payment transactions</p>
+              <p className="text-muted-foreground mt-1">View all your payment transactions</p>
             </div>
             <Button onClick={() => navigate("/dashboard")} className="bg-blue-600 hover:bg-blue-700">
               Back to Dashboard
             </Button>
           </div>
 
-          <Card className="bg-slate-900/50 border-slate-800">
+          <Card>
             <CardHeader>
               <CardTitle>Recent Transactions</CardTitle>
             </CardHeader>
             <CardContent>
               {!projects || projects.length === 0 ? (
-                <div className="text-center py-12 text-slate-400">
+                <div className="text-center py-12 text-muted-foreground">
                   <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>No transactions yet</p>
                 </div>
@@ -72,7 +72,7 @@ export default function Transactions() {
                       key={project._id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="flex items-center justify-between p-4 border border-slate-800 rounded-lg hover:bg-slate-800/50 transition-colors"
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors"
                     >
                       <div className="flex items-center gap-4">
                         <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
@@ -86,7 +86,7 @@ export default function Transactions() {
                         </div>
                         <div>
                           <h3 className="font-semibold">{project.title}</h3>
-                          <p className="text-sm text-slate-400">
+                          <p className="text-sm text-muted-foreground">
                             {user?.role === "client" ? "Payment to escrow" : "Payment from escrow"}
                           </p>
                         </div>
@@ -94,13 +94,13 @@ export default function Transactions() {
                       <div className="flex items-center gap-4">
                         <div className="text-right">
                           <div className={`text-xl font-bold ${
-                            user?.role === "client" ? "text-red-400" : "text-green-400"
+                            user?.role === "client" ? "text-destructive" : "text-green-600"
                           }`}>
                             {user?.role === "client" ? "-" : "+"}${project.totalBudget.toLocaleString()}
                           </div>
-                          <div className="text-xs text-slate-400">{project.currency}</div>
+                          <div className="text-xs text-muted-foreground">{project.currency}</div>
                         </div>
-                        <Badge variant="outline" className="border-slate-700">
+                        <Badge variant="outline">
                           {project.fundingStatus.replace("_", " ")}
                         </Badge>
                       </div>

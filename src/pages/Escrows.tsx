@@ -19,15 +19,15 @@ export default function Escrows() {
   const projects = user?.role === "client" ? clientProjects : freelancerProjects;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur">
+    <div className="min-h-screen bg-background">
+      <header className="border-b">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <LogoDropdown />
             <h1 className="text-2xl font-bold tracking-tight">Escrows</h1>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-400">{user?.email}</span>
+            <span className="text-sm text-muted-foreground">{user?.email}</span>
             <Button variant="outline" size="sm" onClick={() => {
               signOut();
               navigate("/");
@@ -48,7 +48,7 @@ export default function Escrows() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-bold">Escrow Management</h2>
-              <p className="text-slate-400 mt-1">Track funds held in escrow</p>
+              <p className="text-muted-foreground mt-1">Track funds held in escrow</p>
             </div>
             <Button onClick={() => navigate("/dashboard")} className="bg-blue-600 hover:bg-blue-700">
               Back to Dashboard
@@ -56,10 +56,10 @@ export default function Escrows() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
-            <Card className="bg-slate-900/50 border-slate-800">
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-slate-300">Total in Escrow</CardTitle>
-                <Lock className="h-4 w-4 text-blue-400" />
+                <CardTitle className="text-sm font-medium">Total in Escrow</CardTitle>
+                <Lock className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">
@@ -68,10 +68,10 @@ export default function Escrows() {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-900/50 border-slate-800">
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-slate-300">Active Escrows</CardTitle>
-                <DollarSign className="h-4 w-4 text-blue-400" />
+                <CardTitle className="text-sm font-medium">Active Escrows</CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">
@@ -80,10 +80,10 @@ export default function Escrows() {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-900/50 border-slate-800">
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-slate-300">Completed</CardTitle>
-                <CheckCircle className="h-4 w-4 text-blue-400" />
+                <CardTitle className="text-sm font-medium">Completed</CardTitle>
+                <CheckCircle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">
@@ -93,13 +93,13 @@ export default function Escrows() {
             </Card>
           </div>
 
-          <Card className="bg-slate-900/50 border-slate-800">
+          <Card>
             <CardHeader>
               <CardTitle>Escrow Transactions</CardTitle>
             </CardHeader>
             <CardContent>
               {!projects || projects.length === 0 ? (
-                <div className="text-center py-12 text-slate-400">
+                <div className="text-center py-12 text-muted-foreground">
                   <Lock className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>No escrow transactions</p>
                 </div>
@@ -110,18 +110,18 @@ export default function Escrows() {
                       key={project._id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="flex items-center justify-between p-4 border border-slate-800 rounded-lg hover:bg-slate-800/50 cursor-pointer transition-colors"
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent cursor-pointer transition-colors"
                       onClick={() => navigate(`/projects/${project._id}`)}
                     >
                       <div className="flex-1">
                         <h3 className="font-semibold">{project.title}</h3>
-                        <p className="text-sm text-slate-400 mt-1">
+                        <p className="text-sm text-muted-foreground mt-1">
                           {project.fundingStatus.replace("_", " ")}
                         </p>
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="text-right">
-                          <div className="text-sm text-slate-400">Amount</div>
+                          <div className="text-sm text-muted-foreground">Amount</div>
                           <div className="text-xl font-bold">${project.totalBudget.toLocaleString()}</div>
                         </div>
                         <Badge variant={project.status === "active" ? "default" : "outline"}>
