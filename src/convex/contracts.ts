@@ -43,6 +43,36 @@ export const list = query({
   },
 });
 
+export const listClientProjects = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return [];
+
+    const contracts = await ctx.db
+      .query("contracts")
+      .withIndex("by_client", (q) => q.eq("clientId", userId))
+      .collect();
+
+    return contracts;
+  },
+});
+
+export const listFreelancerProjects = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return [];
+
+    const contracts = await ctx.db
+      .query("contracts")
+      .withIndex("by_freelancer", (q) => q.eq("freelancerId", userId))
+      .collect();
+
+    return contracts;
+  },
+});
+
 export const get = query({
   args: { contractId: v.id("contracts") },
   handler: async (ctx, args) => {
@@ -105,6 +135,18 @@ export const fundContract = mutation({
       currentAmount: newAmount,
       fundingStatus:
         newAmount >= contract.totalAmount ? "fully_funded" : "partially_funded",
+    });
+
+    // Create transaction record
+    await ctx.db.insert("transactions", {
+      contractId: args.contractId,
+      fromUserId: userId,
+      toUserId: contract.freelancerId,
+      amount: args.amount,
+      currency: contract.currency,
+      type: "funding",
+      status: "completed",
+      description: `Funded ${contract.title}`,
     });
 
     return args.contractId;

@@ -6,12 +6,18 @@ export const ROLES = {
   ADMIN: "admin",
   USER: "user",
   MEMBER: "member",
+  CLIENT: "client",
+  FREELANCER: "freelancer",
+  ARBITER: "arbiter",
 } as const;
 
 export const roleValidator = v.union(
   v.literal(ROLES.ADMIN),
   v.literal(ROLES.USER),
   v.literal(ROLES.MEMBER),
+  v.literal(ROLES.CLIENT),
+  v.literal(ROLES.FREELANCER),
+  v.literal(ROLES.ARBITER),
 );
 export type Role = Infer<typeof roleValidator>;
 
@@ -76,6 +82,64 @@ const schema = defineSchema(
       ),
       aiVerificationResult: v.optional(v.string()),
     }).index("by_contract", ["contractId"]),
+
+    escrows: defineTable({
+      contractId: v.id("contracts"),
+      amount: v.number(),
+      currency: v.string(),
+      status: v.union(
+        v.literal("pending"),
+        v.literal("funded"),
+        v.literal("released"),
+        v.literal("refunded"),
+        v.literal("disputed")
+      ),
+      fundedAt: v.optional(v.number()),
+      releasedAt: v.optional(v.number()),
+    }).index("by_contract", ["contractId"]),
+
+    disputes: defineTable({
+      contractId: v.id("contracts"),
+      milestoneId: v.optional(v.id("milestones")),
+      raisedBy: v.id("users"),
+      assignedTo: v.optional(v.id("users")),
+      reason: v.string(),
+      evidence: v.optional(v.string()),
+      status: v.union(
+        v.literal("open"),
+        v.literal("under_review"),
+        v.literal("resolved"),
+        v.literal("closed")
+      ),
+      resolution: v.optional(v.string()),
+      resolvedAt: v.optional(v.number()),
+    })
+      .index("by_contract", ["contractId"])
+      .index("by_arbiter", ["assignedTo"]),
+
+    transactions: defineTable({
+      contractId: v.id("contracts"),
+      milestoneId: v.optional(v.id("milestones")),
+      fromUserId: v.id("users"),
+      toUserId: v.id("users"),
+      amount: v.number(),
+      currency: v.string(),
+      type: v.union(
+        v.literal("funding"),
+        v.literal("release"),
+        v.literal("refund"),
+        v.literal("fee")
+      ),
+      status: v.union(
+        v.literal("pending"),
+        v.literal("completed"),
+        v.literal("failed")
+      ),
+      description: v.string(),
+    })
+      .index("by_contract", ["contractId"])
+      .index("by_from_user", ["fromUserId"])
+      .index("by_to_user", ["toUserId"]),
   },
   {
     schemaValidation: false,
