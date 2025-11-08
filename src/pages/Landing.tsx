@@ -18,22 +18,10 @@ export default function Landing() {
             <span className="text-2xl font-bold tracking-tight">Bond</span>
           </div>
           <div className="flex items-center gap-4">
-            {isAuthenticated ? (
-              <Button onClick={() => navigate("/dashboard")} className="rounded-full">
-                Dashboard
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            ) : (
-              <>
-                <Button variant="ghost" onClick={() => navigate("/auth")}>
-                  Sign In
-                </Button>
-                <Button onClick={() => navigate("/auth")} className="rounded-full">
-                  Get Started
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </>
-            )}
+            <Button onClick={() => navigate(isAuthenticated ? "/dashboard" : "/auth")} className="rounded-full">
+              {isAuthenticated ? "Dashboard" : "Sign In"}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
           </div>
         </div>
       </header>
