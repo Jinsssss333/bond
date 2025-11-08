@@ -72,18 +72,6 @@ export default function Landing() {
                 Bond provides secure escrow services for freelancers and clients with
                 milestone-based payments, AI verification, and complete transparency.
               </motion.p>
-
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, duration: 0.6 }}
-                className="flex items-center justify-center gap-4 pt-4"
-              >
-                <Button size="lg" onClick={() => navigate(isAuthenticated ? "/dashboard" : "/auth")}>
-                  {isAuthenticated ? "Go to Dashboard" : "Get Started"}
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </motion.div>
             </motion.div>
           </section>
         </AuroraBackground>
