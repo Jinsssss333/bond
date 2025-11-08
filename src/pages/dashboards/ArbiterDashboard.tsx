@@ -5,11 +5,12 @@ import { useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { AlertCircle, CheckCircle, Clock } from "lucide-react";
 import { LogoDropdown } from "@/components/LogoDropdown";
 
 export default function ArbiterDashboard() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const disputes = useQuery(api.disputes.listOpenDisputes);
 
@@ -27,6 +28,12 @@ export default function ArbiterDashboard() {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">{user?.email}</span>
+            <Button variant="outline" size="sm" onClick={() => {
+              signOut();
+              navigate("/");
+            }}>
+              Sign Out
+            </Button>
           </div>
         </div>
       </header>
