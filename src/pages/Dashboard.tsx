@@ -50,6 +50,12 @@ export default function Dashboard() {
 
   const handleCreateContract = async () => {
     try {
+      // Check if user has client role
+      if (user?.role !== "client") {
+        toast.error("Only clients can create contracts. Please sign in with a client role.");
+        return;
+      }
+
       const amount = parseFloat(newContract.totalAmount);
       if (!newContract.title || !newContract.description || !newContract.freelancerEmail || isNaN(amount)) {
         toast.error("Please fill all fields with valid data");

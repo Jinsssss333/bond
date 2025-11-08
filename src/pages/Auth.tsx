@@ -80,8 +80,15 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
 
       // Set the user's role after successful authentication
       if (selectedRole) {
-        await setRole({ role: selectedRole });
-        toast.success(`Welcome! You're signed in as a ${selectedRole}.`);
+        try {
+          await setRole({ role: selectedRole });
+          toast.success(`Welcome! You're signed in as a ${selectedRole}.`);
+        } catch (roleError) {
+          console.error("Failed to set role:", roleError);
+          toast.error("Failed to set your role. Please try again.");
+          setIsLoading(false);
+          return;
+        }
       }
 
       const redirect = redirectAfterAuth || "/dashboard";
@@ -102,7 +109,15 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
       
       // Set default role for guest
       if (selectedRole) {
-        await setRole({ role: selectedRole });
+        try {
+          await setRole({ role: selectedRole });
+          toast.success(`Signed in as guest with ${selectedRole} role.`);
+        } catch (roleError) {
+          console.error("Failed to set role:", roleError);
+          toast.error("Failed to set your role. Please try again.");
+          setIsLoading(false);
+          return;
+        }
       }
       
       const redirect = redirectAfterAuth || "/dashboard";
