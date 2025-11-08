@@ -56,6 +56,11 @@ export default function Dashboard() {
         return;
       }
 
+      if (amount <= 0) {
+        toast.error("Total amount must be greater than 0");
+        return;
+      }
+
       const contractId = await createContract({
         title: newContract.title,
         description: newContract.description,
@@ -68,8 +73,10 @@ export default function Dashboard() {
       setShowCreateDialog(false);
       setNewContract({ title: "", description: "", freelancerEmail: "", totalAmount: "", currency: "USD" });
       navigate(`/contracts/${contractId}`);
-    } catch (error) {
-      toast.error("Failed to create contract");
+    } catch (error: any) {
+      console.error("Contract creation error:", error);
+      const errorMessage = error?.message || "Failed to create contract";
+      toast.error(errorMessage);
     }
   };
 

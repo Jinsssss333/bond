@@ -23,8 +23,12 @@ export const create = mutation({
       .withIndex("email", (q) => q.eq("email", args.freelancerEmail))
       .first();
 
-    if (!freelancer) throw new Error("Freelancer not found");
-    if (freelancer.role !== "freelancer") throw new Error("User is not a freelancer");
+    if (!freelancer) {
+      throw new Error(`No user found with email: ${args.freelancerEmail}. Please make sure the freelancer has registered.`);
+    }
+    if (freelancer.role !== "freelancer") {
+      throw new Error(`User ${args.freelancerEmail} is not registered as a freelancer. Their current role is: ${freelancer.role || "not set"}`);
+    }
 
     const contractId = await ctx.db.insert("contracts", {
       title: args.title,
