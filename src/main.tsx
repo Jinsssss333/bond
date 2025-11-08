@@ -15,6 +15,9 @@ import NotFound from "./pages/NotFound.tsx";
 import Projects from "./pages/Projects.tsx";
 import Escrows from "./pages/Escrows.tsx";
 import Transactions from "./pages/Transactions.tsx";
+import ArbiterDashboard from "./pages/ArbiterDashboard.tsx";
+import ArbiterDisputes from "./pages/ArbiterDisputes.tsx";
+import ArbiterEscrows from "./pages/ArbiterEscrows.tsx";
 import "./types/global.d.ts";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
@@ -57,6 +60,9 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/escrows" element={<Escrows />} />
             <Route path="/transactions" element={<Transactions />} />
             <Route path="/contracts/:contractId" element={<ContractDetail />} />
+            <Route path="/arbiter/dashboard" element={<ArbiterDashboard />} />
+            <Route path="/arbiter/disputes" element={<ArbiterDisputes />} />
+            <Route path="/arbiter/escrows" element={<ArbiterEscrows />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
