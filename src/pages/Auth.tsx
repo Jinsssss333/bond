@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/input-otp";
 
 import { useAuth } from "@/hooks/use-auth";
-import { ArrowRight, Loader2, Mail, UserX } from "lucide-react";
+import { ArrowRight, Loader2, Mail } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -26,7 +26,8 @@ interface AuthProps {
 function Auth({ redirectAfterAuth }: AuthProps = {}) {
   const { isLoading: authLoading, isAuthenticated, signIn } = useAuth();
   const navigate = useNavigate();
-  const [step, setStep] = useState<"signIn" | { email: string }>("signIn");
+  const [step, setStep] = useState<"roleSelect" | "signIn" | { email: string }>("roleSelect");
+  const [selectedRole, setSelectedRole] = useState<"client" | "freelancer" | "arbiter" | null>(null);
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,12 +38,18 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
       navigate(redirect);
     }
   }, [authLoading, isAuthenticated, navigate, redirectAfterAuth]);
+  const handleRoleSelect = (role: "client" | "freelancer" | "arbiter") => {
+    setSelectedRole(role);
+    setStep("signIn");
+  };
+
   const handleEmailSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
     try {
       const formData = new FormData(event.currentTarget);
+      formData.append("role", selectedRole || "client");
       await signIn("email-otp", formData);
       setStep({ email: formData.get("email") as string });
       setIsLoading(false);
@@ -79,23 +86,6 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
     }
   };
 
-  const handleGuestLogin = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      console.log("Attempting anonymous sign in...");
-      await signIn("anonymous");
-      console.log("Anonymous sign in successful");
-      const redirect = redirectAfterAuth || "/";
-      navigate(redirect);
-    } catch (error) {
-      console.error("Guest login error:", error);
-      console.error("Error details:", JSON.stringify(error, null, 2));
-      setError(`Failed to sign in as guest: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen flex flex-col">
 
@@ -104,7 +94,58 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
       <div className="flex-1 flex items-center justify-center">
         <div className="flex items-center justify-center h-full flex-col">
         <Card className="min-w-[350px] pb-0 border shadow-md">
-          {step === "signIn" ? (
+          {step === "roleSelect" ? (
+            <>
+              <CardHeader className="text-center">
+                <div className="flex justify-center">
+                  <img
+                    src="./logo.svg"
+                    alt="Lock Icon"
+                    width={64}
+                    height={64}
+                    className="rounded-lg mb-4 mt-4 cursor-pointer"
+                    onClick={() => navigate("/")}
+                  />
+                </div>
+                <CardTitle className="text-xl">Select Your Role</CardTitle>
+                <CardDescription>
+                  Choose how you'll use Bond
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button
+                  onClick={() => handleRoleSelect("client")}
+                  variant="outline"
+                  className="w-full justify-start h-auto py-3"
+                >
+                  <div className="text-left">
+                    <div className="font-semibold">Client</div>
+                    <div className="text-xs text-muted-foreground">Post projects and manage escrows</div>
+                  </div>
+                </Button>
+                <Button
+                  onClick={() => handleRoleSelect("freelancer")}
+                  variant="outline"
+                  className="w-full justify-start h-auto py-3"
+                >
+                  <div className="text-left">
+                    <div className="font-semibold">Freelancer</div>
+                    <div className="text-xs text-muted-foreground">Accept projects and deliver work</div>
+                  </div>
+                </Button>
+                <Button
+                  onClick={() => handleRoleSelect("arbiter")}
+                  variant="outline"
+                  className="w-full justify-start h-auto py-3"
+                >
+                  <div className="text-left">
+                    <div className="font-semibold">Arbiter</div>
+                    <div className="text-xs text-muted-foreground">Resolve disputes between parties</div>
+                  </div>
+                </Button>
+              </CardContent>
+            </>
+          ) : step === "signIn" ? (
             <>
               <CardHeader className="text-center">
               <div className="flex justify-center">
@@ -153,30 +194,6 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                   {error && (
                     <p className="mt-2 text-sm text-red-500">{error}</p>
                   )}
-                  
-                  <div className="mt-4">
-                    <div className="relative">
-                      <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t" />
-                      </div>
-                      <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-background px-2 text-muted-foreground">
-                          Or
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full mt-4"
-                      onClick={handleGuestLogin}
-                      disabled={isLoading}
-                    >
-                      <UserX className="mr-2 h-4 w-4" />
-                      Continue as Guest
-                    </Button>
-                  </div>
                 </CardContent>
               </form>
             </>
@@ -253,11 +270,11 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                   <Button
                     type="button"
                     variant="ghost"
-                    onClick={() => setStep("signIn")}
+                    onClick={() => setStep("roleSelect")}
                     disabled={isLoading}
                     className="w-full"
                   >
-                    Use different email
+                    Change role
                   </Button>
                 </CardFooter>
               </form>

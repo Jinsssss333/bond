@@ -2,111 +2,93 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
-export const create = mutation({
+export const createProject = mutation({
   args: {
     title: v.string(),
     description: v.string(),
-    clientId: v.id("users"),
     freelancerId: v.id("users"),
-    totalAmount: v.number(),
+    totalBudget: v.number(),
     currency: v.string(),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
 
-    const contractId = await ctx.db.insert("contracts", {
-      ...args,
+    const projectId = await ctx.db.insert("projects", {
+      title: args.title,
+      description: args.description,
+      clientId: userId,
+      freelancerId: args.freelancerId,
+      totalBudget: args.totalBudget,
+      currency: args.currency,
       status: "draft" as const,
       fundingStatus: "unfunded" as const,
-      createdBy: userId,
-      currentAmount: 0,
     });
 
-    return contractId;
+    return projectId;
   },
 });
 
-export const list = query({
+export const listClientProjects = query({
   args: {},
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return [];
 
-    const contracts = await ctx.db
-      .query("contracts")
+    return await ctx.db
+      .query("projects")
+      .withIndex("by_clientId", (q) => q.eq("clientId", userId))
       .collect();
-
-    return contracts.filter(
-      (c) => c.clientId === userId || c.freelancerId === userId
-    );
   },
 });
 
-export const get = query({
-  args: { contractId: v.id("contracts") },
+export const listFreelancerProjects = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return [];
+
+    return await ctx.db
+      .query("projects")
+      .withIndex("by_freelancerId", (q) => q.eq("freelancerId", userId))
+      .collect();
+  },
+});
+
+export const getProject = query({
+  args: { projectId: v.id("projects") },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return null;
 
-    const contract = await ctx.db.get(args.contractId);
-    if (!contract) return null;
+    const project = await ctx.db.get(args.projectId);
+    if (!project) return null;
 
-    if (contract.clientId !== userId && contract.freelancerId !== userId) {
+    if (project.clientId !== userId && project.freelancerId !== userId) {
       return null;
     }
 
-    return contract;
+    return project;
   },
 });
 
-export const updateStatus = mutation({
+export const fundProject = mutation({
   args: {
-    contractId: v.id("contracts"),
-    status: v.union(
-      v.literal("draft"),
-      v.literal("active"),
-      v.literal("completed"),
-      v.literal("disputed"),
-      v.literal("cancelled")
-    ),
-  },
-  handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
-    const contract = await ctx.db.get(args.contractId);
-    if (!contract) throw new Error("Contract not found");
-
-    await ctx.db.patch(args.contractId, {
-      status: args.status,
-    });
-
-    return args.contractId;
-  },
-});
-
-export const fundContract = mutation({
-  args: {
-    contractId: v.id("contracts"),
+    projectId: v.id("projects"),
     amount: v.number(),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
 
-    const contract = await ctx.db.get(args.contractId);
-    if (!contract) throw new Error("Contract not found");
-    if (contract.clientId !== userId) throw new Error("Only client can fund");
+    const project = await ctx.db.get(args.projectId);
+    if (!project) throw new Error("Project not found");
+    if (project.clientId !== userId) throw new Error("Only client can fund");
 
-    const newAmount = contract.currentAmount + args.amount;
-
-    await ctx.db.patch(args.contractId, {
-      currentAmount: newAmount,
-      fundingStatus:
-        newAmount >= contract.totalAmount ? "fully_funded" : "partially_funded",
+    await ctx.db.patch(args.projectId, {
+      fundingStatus: "partially_funded" as const,
     });
 
-    return args.contractId;
+    return args.projectId;
   },
 });
