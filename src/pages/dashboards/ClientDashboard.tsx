@@ -111,15 +111,24 @@ export default function ClientDashboard() {
                 <LayoutGrid className="h-4 w-4" />
                 Dashboard
               </button>
-              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-300 text-sm font-medium transition-colors">
+              <button 
+                onClick={() => navigate("/projects")}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-300 text-sm font-medium transition-colors"
+              >
                 <FileText className="h-4 w-4" />
                 Projects
               </button>
-              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-300 text-sm font-medium transition-colors">
+              <button 
+                onClick={() => navigate("/escrows")}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-300 text-sm font-medium transition-colors"
+              >
                 <DollarSign className="h-4 w-4" />
                 Escrows
               </button>
-              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-300 text-sm font-medium transition-colors">
+              <button 
+                onClick={() => navigate("/transactions")}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-300 text-sm font-medium transition-colors"
+              >
                 <AlertCircle className="h-4 w-4" />
                 Transactions
               </button>
