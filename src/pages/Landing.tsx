@@ -11,7 +11,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b">
+      <header className="relative z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <img src="./logo.svg" alt="Bond" width={32} height={32} className="rounded-lg" />
@@ -19,7 +19,7 @@ export default function Landing() {
           </div>
           <div className="flex items-center gap-4">
             {isAuthenticated ? (
-              <Button onClick={() => navigate("/dashboard")}>
+              <Button onClick={() => navigate("/dashboard")} className="rounded-full">
                 Dashboard
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -28,7 +28,7 @@ export default function Landing() {
                 <Button variant="ghost" onClick={() => navigate("/auth")}>
                   Sign In
                 </Button>
-                <Button onClick={() => navigate("/auth")}>
+                <Button onClick={() => navigate("/auth")} className="rounded-full">
                   Get Started
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
