@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { Shield, Lock, CheckCircle, Zap, ArrowRight } from "lucide-react";
+import { AuroraBackground } from "@/components/ui/aurora-background";
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -38,40 +39,57 @@ export default function Landing() {
       </header>
 
       <main>
-        <section className="container mx-auto px-4 py-24 max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center space-y-6"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border bg-muted/50 text-sm">
-              <Shield className="h-4 w-4" />
-              Secure Freelance Escrow Platform
-            </div>
-            
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
-              Trust in every
-              <br />
-              <span className="text-primary">freelance deal</span>
-            </h1>
-            
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Bond provides secure escrow services for freelancers and clients with
-              milestone-based payments, AI verification, and complete transparency.
-            </p>
+        <AuroraBackground>
+          <section className="container mx-auto px-4 py-24 max-w-6xl relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-center space-y-6"
+            >
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border bg-muted/50 text-sm backdrop-blur-sm">
+                <Shield className="h-4 w-4" />
+                Secure Freelance Escrow Platform
+              </div>
+              
+              <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.6 }}
+                className="text-5xl md:text-7xl font-bold tracking-tight"
+              >
+                Trust in every
+                <br />
+                <span className="text-primary">freelance deal</span>
+              </motion.h1>
+              
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.6 }}
+                className="text-xl text-muted-foreground max-w-2xl mx-auto"
+              >
+                Bond provides secure escrow services for freelancers and clients with
+                milestone-based payments, AI verification, and complete transparency.
+              </motion.p>
 
-            <div className="flex items-center justify-center gap-4 pt-4">
-              <Button size="lg" onClick={() => navigate("/auth")}>
-                Start Free Trial
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Button size="lg" variant="outline">
-                Watch Demo
-              </Button>
-            </div>
-          </motion.div>
-        </section>
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6, duration: 0.6 }}
+                className="flex items-center justify-center gap-4 pt-4"
+              >
+                <Button size="lg" onClick={() => navigate("/auth")}>
+                  Start Free Trial
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+                <Button size="lg" variant="outline">
+                  Watch Demo
+                </Button>
+              </motion.div>
+            </motion.div>
+          </section>
+        </AuroraBackground>
 
         <section className="container mx-auto px-4 py-24 max-w-6xl">
           <motion.div
