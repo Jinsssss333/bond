@@ -79,7 +79,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
     }
   };
 
-  const handleGuestLogin = async () => {
+  const handleGuestLogin = async (role: "client" | "freelancer" | "arbiter") => {
     setIsLoading(true);
     setError(null);
     try {
@@ -170,7 +170,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                       type="button"
                       variant="outline"
                       className="w-full mt-4"
-                      onClick={handleGuestLogin}
+                      onClick={() => handleGuestLogin("client")}
                       disabled={isLoading}
                     >
                       <UserX className="mr-2 h-4 w-4" />

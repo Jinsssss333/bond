@@ -17,6 +17,8 @@ import type * as aiVerification from "../aiVerification.js";
 import type * as auth_emailOtp from "../auth/emailOtp.js";
 import type * as auth from "../auth.js";
 import type * as contracts from "../contracts.js";
+import type * as disputes from "../disputes.js";
+import type * as escrows from "../escrows.js";
 import type * as http from "../http.js";
 import type * as milestones from "../milestones.js";
 import type * as users from "../users.js";
@@ -34,6 +36,8 @@ declare const fullApi: ApiFromModules<{
   "auth/emailOtp": typeof auth_emailOtp;
   auth: typeof auth;
   contracts: typeof contracts;
+  disputes: typeof disputes;
+  escrows: typeof escrows;
   http: typeof http;
   milestones: typeof milestones;
   users: typeof users;

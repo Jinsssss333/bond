@@ -4,7 +4,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const create = mutation({
   args: {
-    contractId: v.id("contracts"),
+    projectId: v.id("projects"),
     title: v.string(),
     description: v.string(),
     amount: v.number(),
@@ -14,8 +14,8 @@ export const create = mutation({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
 
-    const contract = await ctx.db.get(args.contractId);
-    if (!contract) throw new Error("Contract not found");
+    const project = await ctx.db.get(args.projectId);
+    if (!project) throw new Error("Project not found");
 
     const milestoneId = await ctx.db.insert("milestones", {
       ...args,
@@ -29,18 +29,16 @@ export const create = mutation({
   },
 });
 
-export const listByContract = query({
-  args: { contractId: v.id("contracts") },
+export const listByProject = query({
+  args: { projectId: v.id("projects") },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return [];
 
-    const milestones = await ctx.db
+    return await ctx.db
       .query("milestones")
-      .filter((q) => q.eq(q.field("contractId"), args.contractId))
+      .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
       .collect();
-
-    return milestones;
   },
 });
 
@@ -48,7 +46,6 @@ export const submitDeliverable = mutation({
   args: {
     milestoneId: v.id("milestones"),
     deliverableUrl: v.string(),
-    notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -67,7 +64,7 @@ export const submitDeliverable = mutation({
   },
 });
 
-export const approve = mutation({
+export const requestRelease = mutation({
   args: {
     milestoneId: v.id("milestones"),
   },
@@ -78,13 +75,29 @@ export const approve = mutation({
     const milestone = await ctx.db.get(args.milestoneId);
     if (!milestone) throw new Error("Milestone not found");
 
-    const contract = await ctx.db.get(milestone.contractId);
-    if (!contract) throw new Error("Contract not found");
-    if (contract.clientId !== userId) throw new Error("Only client can approve");
-
     await ctx.db.patch(args.milestoneId, {
       status: "approved" as const,
       approvedAt: Date.now(),
+    });
+
+    return args.milestoneId;
+  },
+});
+
+export const releaseMilestone = mutation({
+  args: {
+    milestoneId: v.id("milestones"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    const milestone = await ctx.db.get(args.milestoneId);
+    if (!milestone) throw new Error("Milestone not found");
+
+    await ctx.db.patch(args.milestoneId, {
+      status: "released" as const,
+      releasedAt: Date.now(),
     });
 
     return args.milestoneId;
