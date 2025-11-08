@@ -78,16 +78,17 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
       const formData = new FormData(event.currentTarget);
       await signIn("email-otp", formData);
 
-      // Set the user's role after successful authentication
+      // Wait a moment for auth to complete, then set role
       if (selectedRole) {
+        // Small delay to ensure auth is fully processed
+        await new Promise(resolve => setTimeout(resolve, 500));
         try {
           await setRole({ role: selectedRole });
           toast.success(`Welcome! You're signed in as a ${selectedRole}.`);
         } catch (roleError) {
           console.error("Failed to set role:", roleError);
-          toast.error("Failed to set your role. Please try again.");
-          setIsLoading(false);
-          return;
+          toast.error("Authentication successful, but failed to set role. Please contact support.");
+          // Still navigate to dashboard even if role setting fails
         }
       }
 
@@ -107,16 +108,16 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
     try {
       await signIn("anonymous");
       
-      // Set default role for guest
+      // Wait a moment for auth to complete, then set role
       if (selectedRole) {
+        await new Promise(resolve => setTimeout(resolve, 500));
         try {
           await setRole({ role: selectedRole });
           toast.success(`Signed in as guest with ${selectedRole} role.`);
         } catch (roleError) {
           console.error("Failed to set role:", roleError);
-          toast.error("Failed to set your role. Please try again.");
-          setIsLoading(false);
-          return;
+          toast.error("Authentication successful, but failed to set role. Please contact support.");
+          // Still navigate to dashboard even if role setting fails
         }
       }
       

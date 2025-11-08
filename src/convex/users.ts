@@ -41,7 +41,14 @@ export const setRole = mutation({
   args: { role: roleValidator },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    if (!userId) {
+      throw new Error("Not authenticated. Please sign in first.");
+    }
+
+    const user = await ctx.db.get(userId);
+    if (!user) {
+      throw new Error("User not found in database.");
+    }
 
     await ctx.db.patch(userId, {
       role: args.role,
