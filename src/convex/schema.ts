@@ -44,6 +44,7 @@ const schema = defineSchema(
       currency: v.string(),
       status: v.union(
         v.literal("draft"),
+        v.literal("pending_acceptance"),
         v.literal("active"),
         v.literal("completed"),
         v.literal("disputed"),
@@ -85,6 +86,7 @@ const schema = defineSchema(
 
     escrows: defineTable({
       contractId: v.id("contracts"),
+      escrowId: v.string(),
       amount: v.number(),
       currency: v.string(),
       status: v.union(
@@ -128,7 +130,8 @@ const schema = defineSchema(
         v.literal("funding"),
         v.literal("release"),
         v.literal("refund"),
-        v.literal("fee")
+        v.literal("fee"),
+        v.literal("payout")
       ),
       status: v.union(
         v.literal("pending"),

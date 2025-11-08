@@ -34,12 +34,15 @@ export const create = mutation({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
 
-    const escrowId = await ctx.db.insert("escrows", {
+    const escrowId = `ESC-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+    
+    const id = await ctx.db.insert("escrows", {
       ...args,
+      escrowId,
       status: "pending" as const,
     });
 
-    return escrowId;
+    return id;
   },
 });
 

@@ -16,6 +16,7 @@ export const create = mutation({
 
     const contract = await ctx.db.get(args.contractId);
     if (!contract) throw new Error("Contract not found");
+    if (contract.clientId !== userId) throw new Error("Only client can create milestones");
 
     const milestoneId = await ctx.db.insert("milestones", {
       ...args,
@@ -37,7 +38,7 @@ export const listByContract = query({
 
     const milestones = await ctx.db
       .query("milestones")
-      .filter((q) => q.eq(q.field("contractId"), args.contractId))
+      .withIndex("by_contract", (q) => q.eq("contractId", args.contractId))
       .collect();
 
     return milestones;
@@ -56,6 +57,10 @@ export const submitDeliverable = mutation({
 
     const milestone = await ctx.db.get(args.milestoneId);
     if (!milestone) throw new Error("Milestone not found");
+
+    const contract = await ctx.db.get(milestone.contractId);
+    if (!contract) throw new Error("Contract not found");
+    if (contract.freelancerId !== userId) throw new Error("Only freelancer can submit");
 
     await ctx.db.patch(args.milestoneId, {
       deliverableUrl: args.deliverableUrl,
@@ -87,6 +92,32 @@ export const approve = mutation({
       approvedAt: Date.now(),
     });
 
+    // Release funds from escrow
+    const escrow = await ctx.db
+      .query("escrows")
+      .withIndex("by_contract", (q) => q.eq("contractId", milestone.contractId))
+      .first();
+
+    if (escrow && escrow.status === "funded") {
+      await ctx.db.patch(escrow._id, {
+        status: "released" as const,
+        releasedAt: Date.now(),
+      });
+    }
+
+    // Create transaction for release
+    await ctx.db.insert("transactions", {
+      contractId: milestone.contractId,
+      milestoneId: args.milestoneId,
+      fromUserId: contract.clientId,
+      toUserId: contract.freelancerId,
+      amount: milestone.amount,
+      currency: contract.currency,
+      type: "release",
+      status: "completed",
+      description: `Released funds for milestone: ${milestone.title}`,
+    });
+
     return args.milestoneId;
   },
 });
@@ -103,6 +134,43 @@ export const requestRevision = mutation({
     await ctx.db.patch(args.milestoneId, {
       status: "revision_requested" as const,
       revisionNotes: args.revisionNotes,
+    });
+
+    return args.milestoneId;
+  },
+});
+
+export const initiatePayout = mutation({
+  args: {
+    milestoneId: v.id("milestones"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    const milestone = await ctx.db.get(args.milestoneId);
+    if (!milestone) throw new Error("Milestone not found");
+
+    const contract = await ctx.db.get(milestone.contractId);
+    if (!contract) throw new Error("Contract not found");
+    if (contract.freelancerId !== userId) throw new Error("Only freelancer can initiate payout");
+    if (milestone.status !== "approved") throw new Error("Milestone must be approved first");
+
+    await ctx.db.patch(args.milestoneId, {
+      status: "paid" as const,
+    });
+
+    // Create payout transaction
+    await ctx.db.insert("transactions", {
+      contractId: milestone.contractId,
+      milestoneId: args.milestoneId,
+      fromUserId: contract.clientId,
+      toUserId: contract.freelancerId,
+      amount: milestone.amount,
+      currency: contract.currency,
+      type: "payout",
+      status: "completed",
+      description: `Payout for milestone: ${milestone.title}`,
     });
 
     return args.milestoneId;

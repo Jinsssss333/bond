@@ -25,7 +25,7 @@ export default function Dashboard() {
   const [newContract, setNewContract] = useState({
     title: "",
     description: "",
-    freelancerId: "",
+    freelancerEmail: "",
     totalAmount: "",
     currency: "USD",
   });
@@ -51,7 +51,7 @@ export default function Dashboard() {
   const handleCreateContract = async () => {
     try {
       const amount = parseFloat(newContract.totalAmount);
-      if (!newContract.title || !newContract.description || !newContract.freelancerId || isNaN(amount)) {
+      if (!newContract.title || !newContract.description || !newContract.freelancerEmail || isNaN(amount)) {
         toast.error("Please fill all fields with valid data");
         return;
       }
@@ -59,15 +59,14 @@ export default function Dashboard() {
       const contractId = await createContract({
         title: newContract.title,
         description: newContract.description,
-        clientId: user._id,
-        freelancerId: newContract.freelancerId as any,
+        freelancerEmail: newContract.freelancerEmail,
         totalAmount: amount,
         currency: newContract.currency,
       });
 
       toast.success("Contract created successfully");
       setShowCreateDialog(false);
-      setNewContract({ title: "", description: "", freelancerId: "", totalAmount: "", currency: "USD" });
+      setNewContract({ title: "", description: "", freelancerEmail: "", totalAmount: "", currency: "USD" });
       navigate(`/contracts/${contractId}`);
     } catch (error) {
       toast.error("Failed to create contract");
@@ -188,11 +187,12 @@ export default function Dashboard() {
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium">Freelancer User ID</label>
+                      <label className="text-sm font-medium">Freelancer Email</label>
                       <Input
-                        value={newContract.freelancerId}
-                        onChange={(e) => setNewContract({ ...newContract, freelancerId: e.target.value })}
-                        placeholder="Freelancer's user ID"
+                        type="email"
+                        value={newContract.freelancerEmail}
+                        onChange={(e) => setNewContract({ ...newContract, freelancerEmail: e.target.value })}
+                        placeholder="freelancer@example.com"
                       />
                     </div>
                     <div>

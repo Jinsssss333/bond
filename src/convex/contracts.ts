@@ -6,8 +6,7 @@ export const create = mutation({
   args: {
     title: v.string(),
     description: v.string(),
-    clientId: v.id("users"),
-    freelancerId: v.id("users"),
+    freelancerEmail: v.string(),
     totalAmount: v.number(),
     currency: v.string(),
   },
@@ -15,15 +14,60 @@ export const create = mutation({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
 
+    const user = await ctx.db.get(userId);
+    if (user?.role !== "client") throw new Error("Only clients can create contracts");
+
+    // Find freelancer by email
+    const freelancer = await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", args.freelancerEmail))
+      .first();
+
+    if (!freelancer) throw new Error("Freelancer not found");
+    if (freelancer.role !== "freelancer") throw new Error("User is not a freelancer");
+
     const contractId = await ctx.db.insert("contracts", {
-      ...args,
-      status: "draft" as const,
+      title: args.title,
+      description: args.description,
+      clientId: userId,
+      freelancerId: freelancer._id,
+      totalAmount: args.totalAmount,
+      currency: args.currency,
+      status: "pending_acceptance" as const,
       fundingStatus: "unfunded" as const,
       createdBy: userId,
       currentAmount: 0,
     });
 
+    // Create escrow with random ID
+    const escrowId = `ESC-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+    await ctx.db.insert("escrows", {
+      contractId,
+      amount: args.totalAmount,
+      currency: args.currency,
+      status: "pending" as const,
+      escrowId,
+    });
+
     return contractId;
+  },
+});
+
+export const acceptContract = mutation({
+  args: { contractId: v.id("contracts") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    const contract = await ctx.db.get(args.contractId);
+    if (!contract) throw new Error("Contract not found");
+    if (contract.freelancerId !== userId) throw new Error("Only assigned freelancer can accept");
+
+    await ctx.db.patch(args.contractId, {
+      status: "active" as const,
+    });
+
+    return args.contractId;
   },
 });
 
@@ -95,6 +139,7 @@ export const updateStatus = mutation({
     contractId: v.id("contracts"),
     status: v.union(
       v.literal("draft"),
+      v.literal("pending_acceptance"),
       v.literal("active"),
       v.literal("completed"),
       v.literal("disputed"),
@@ -136,6 +181,19 @@ export const fundContract = mutation({
       fundingStatus:
         newAmount >= contract.totalAmount ? "fully_funded" : "partially_funded",
     });
+
+    // Update escrow
+    const escrow = await ctx.db
+      .query("escrows")
+      .withIndex("by_contract", (q) => q.eq("contractId", args.contractId))
+      .first();
+
+    if (escrow) {
+      await ctx.db.patch(escrow._id, {
+        status: "funded" as const,
+        fundedAt: Date.now(),
+      });
+    }
 
     // Create transaction record
     await ctx.db.insert("transactions", {
