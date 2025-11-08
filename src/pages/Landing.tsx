@@ -79,12 +79,9 @@ export default function Landing() {
                 transition={{ delay: 0.6, duration: 0.6 }}
                 className="flex items-center justify-center gap-4 pt-4"
               >
-                <Button size="lg" onClick={() => navigate("/auth")}>
-                  Start Free Trial
+                <Button size="lg" onClick={() => navigate(isAuthenticated ? "/dashboard" : "/auth")}>
+                  {isAuthenticated ? "Go to Dashboard" : "Get Started"}
                   <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                <Button size="lg" variant="outline">
-                  Watch Demo
                 </Button>
               </motion.div>
             </motion.div>
