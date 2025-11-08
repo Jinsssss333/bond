@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, FileText, DollarSign, Clock } from "lucide-react";
+import { Plus, FileText, DollarSign, AlertCircle, LayoutDashboard, Briefcase, Lock, Receipt } from "lucide-react";
 import { LogoDropdown } from "@/components/LogoDropdown";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,7 @@ export default function Dashboard() {
   const { isLoading, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const contracts = useQuery(api.contracts.list);
+  const disputes = useQuery(api.disputes.list);
   const createContract = useMutation(api.contracts.create);
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -44,8 +45,8 @@ export default function Dashboard() {
   }
 
   const activeContracts = contracts?.filter((c) => c.status === "active") || [];
-  const totalValue = contracts?.reduce((sum, c) => sum + c.totalAmount, 0) || 0;
-  const fundedValue = contracts?.reduce((sum, c) => sum + c.currentAmount, 0) || 0;
+  const totalValue = contracts?.reduce((sum, c) => sum + c.currentAmount, 0) || 0;
+  const openDisputes = disputes?.filter((d) => d.status === "open") || [];
 
   const handleCreateContract = async () => {
     try {
@@ -74,199 +75,207 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <LogoDropdown />
-            <h1 className="text-2xl font-bold tracking-tight">Bond</h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">{user.email}</span>
+    <div className="min-h-screen bg-background flex">
+      {/* Sidebar */}
+      <aside className="w-64 border-r bg-card flex flex-col">
+        <div className="p-6 border-b">
+          <div className="flex items-center gap-2">
+            <img src="/logo.svg" alt="Bond" width={32} height={32} className="rounded-lg" />
+            <span className="text-2xl font-bold tracking-tight text-primary">BOND</span>
           </div>
         </div>
-      </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-7xl">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-              <p className="text-muted-foreground mt-1">
-                Manage your escrow contracts and milestones
-              </p>
+        <nav className="flex-1 p-4 space-y-2">
+          <Button
+            variant="default"
+            className="w-full justify-start gap-3"
+            onClick={() => navigate("/dashboard")}
+          >
+            <LayoutDashboard className="h-5 w-5" />
+            Dashboard
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-3"
+            onClick={() => navigate("/projects")}
+          >
+            <Briefcase className="h-5 w-5" />
+            Projects
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-3"
+            onClick={() => navigate("/escrows")}
+          >
+            <Lock className="h-5 w-5" />
+            Escrows
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-3"
+            onClick={() => navigate("/transactions")}
+          >
+            <Receipt className="h-5 w-5" />
+            Transactions
+          </Button>
+        </nav>
+
+        <div className="p-4 border-t space-y-2">
+          <Button variant="ghost" className="w-full justify-start gap-3">
+            <FileText className="h-5 w-5" />
+            Developer
+          </Button>
+          <Button variant="ghost" className="w-full justify-start gap-3">
+            <AlertCircle className="h-5 w-5" />
+            Help & Support
+          </Button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <header className="border-b bg-card">
+          <div className="px-8 py-4 flex items-center justify-between">
+            <h1 className="text-sm text-muted-foreground">Bond - Guaranteed Payments</h1>
+            <div className="flex items-center gap-4">
+              <LogoDropdown />
             </div>
-            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  New Contract
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Create New Contract</DialogTitle>
-                  <DialogDescription>
-                    Set up a new escrow contract with a freelancer
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium">Title</label>
-                    <Input
-                      value={newContract.title}
-                      onChange={(e) => setNewContract({ ...newContract, title: e.target.value })}
-                      placeholder="Contract title"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">Description</label>
-                    <Textarea
-                      value={newContract.description}
-                      onChange={(e) => setNewContract({ ...newContract, description: e.target.value })}
-                      placeholder="Describe the project"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">Freelancer User ID</label>
-                    <Input
-                      value={newContract.freelancerId}
-                      onChange={(e) => setNewContract({ ...newContract, freelancerId: e.target.value })}
-                      placeholder="Freelancer's user ID"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">Total Amount</label>
-                    <Input
-                      type="number"
-                      value={newContract.totalAmount}
-                      onChange={(e) => setNewContract({ ...newContract, totalAmount: e.target.value })}
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">Currency</label>
-                    <Input
-                      value={newContract.currency}
-                      onChange={(e) => setNewContract({ ...newContract, currency: e.target.value })}
-                      placeholder="USD"
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-                    Cancel
+          </div>
+        </header>
+
+        {/* Content */}
+        <main className="flex-1 p-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="space-y-8"
+          >
+            {/* Welcome Section */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-3xl font-bold tracking-tight">
+                Welcome back, {user.name || user.email || "User"}!
+              </h2>
+              <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+                <DialogTrigger asChild>
+                  <Button>
+                    Create Escrow
                   </Button>
-                  <Button onClick={handleCreateContract}>Create Contract</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create New Contract</DialogTitle>
+                    <DialogDescription>
+                      Set up a new escrow contract with a freelancer
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium">Title</label>
+                      <Input
+                        value={newContract.title}
+                        onChange={(e) => setNewContract({ ...newContract, title: e.target.value })}
+                        placeholder="Contract title"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Description</label>
+                      <Textarea
+                        value={newContract.description}
+                        onChange={(e) => setNewContract({ ...newContract, description: e.target.value })}
+                        placeholder="Describe the project"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Freelancer User ID</label>
+                      <Input
+                        value={newContract.freelancerId}
+                        onChange={(e) => setNewContract({ ...newContract, freelancerId: e.target.value })}
+                        placeholder="Freelancer's user ID"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Total Amount</label>
+                      <Input
+                        type="number"
+                        value={newContract.totalAmount}
+                        onChange={(e) => setNewContract({ ...newContract, totalAmount: e.target.value })}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Currency</label>
+                      <Input
+                        value={newContract.currency}
+                        onChange={(e) => setNewContract({ ...newContract, currency: e.target.value })}
+                        placeholder="USD"
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleCreateContract}>Create Contract</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
 
-          <div className="grid gap-4 md:grid-cols-3 mb-8">
+            {/* Stats Cards */}
+            <div className="grid gap-6 md:grid-cols-3">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Active Projects
+                  </CardTitle>
+                  <Briefcase className="h-5 w-5 text-primary" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">{activeContracts.length}</div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Total in Escrow
+                  </CardTitle>
+                  <DollarSign className="h-5 w-5 text-primary" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">
+                    ${totalValue.toLocaleString()}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Open Disputes
+                  </CardTitle>
+                  <AlertCircle className="h-5 w-5 text-primary" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">{openDisputes.length}</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Recent Activity */}
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Active Contracts
-                </CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
+              <CardHeader>
+                <CardTitle>Recent Activity</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{activeContracts.length}</div>
+                <p className="text-muted-foreground">Activity feed coming soon...</p>
               </CardContent>
             </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total Value
-                </CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  ${totalValue.toLocaleString()}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Funded Amount
-                </CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  ${fundedValue.toLocaleString()}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Contracts</CardTitle>
-              <CardDescription>
-                Your latest escrow agreements
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {!contracts || contracts.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No contracts yet. Create your first one!</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {contracts.map((contract) => (
-                    <motion.div
-                      key={contract._id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent cursor-pointer transition-colors"
-                      onClick={() => navigate(`/contracts/${contract._id}`)}
-                    >
-                      <div className="flex-1">
-                        <h3 className="font-semibold">{contract.title}</h3>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {contract.description}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <div className="font-semibold">
-                            ${contract.totalAmount.toLocaleString()}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            ${contract.currentAmount.toLocaleString()} funded
-                          </div>
-                        </div>
-                        <Badge
-                          variant={
-                            contract.status === "active"
-                              ? "default"
-                              : contract.status === "completed"
-                              ? "secondary"
-                              : "outline"
-                          }
-                        >
-                          {contract.status}
-                        </Badge>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
-      </main>
+          </motion.div>
+        </main>
+      </div>
     </div>
   );
 }
