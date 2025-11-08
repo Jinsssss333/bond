@@ -3,15 +3,15 @@ import { defineSchema, defineTable } from "convex/server";
 import { Infer, v } from "convex/values";
 
 export const ROLES = {
-  CLIENT: "client",
-  FREELANCER: "freelancer",
-  ARBITER: "arbiter",
+  ADMIN: "admin",
+  USER: "user",
+  MEMBER: "member",
 } as const;
 
 export const roleValidator = v.union(
-  v.literal(ROLES.CLIENT),
-  v.literal(ROLES.FREELANCER),
-  v.literal(ROLES.ARBITER),
+  v.literal(ROLES.ADMIN),
+  v.literal(ROLES.USER),
+  v.literal(ROLES.MEMBER),
 );
 export type Role = Infer<typeof roleValidator>;
 
@@ -53,31 +53,8 @@ const schema = defineSchema(
       .index("by_client", ["clientId"])
       .index("by_freelancer", ["freelancerId"]),
 
-    projects: defineTable({
-      title: v.string(),
-      description: v.string(),
-      clientId: v.id("users"),
-      freelancerId: v.id("users"),
-      totalBudget: v.number(),
-      currency: v.string(),
-      status: v.union(
-        v.literal("draft"),
-        v.literal("active"),
-        v.literal("completed"),
-        v.literal("disputed"),
-        v.literal("cancelled")
-      ),
-      fundingStatus: v.union(
-        v.literal("unfunded"),
-        v.literal("partially_funded"),
-        v.literal("fully_funded")
-      ),
-    })
-      .index("by_clientId", ["clientId"])
-      .index("by_freelancerId", ["freelancerId"]),
-
     milestones: defineTable({
-      projectId: v.id("projects"),
+      contractId: v.id("contracts"),
       title: v.string(),
       description: v.string(),
       amount: v.number(),
@@ -88,55 +65,17 @@ const schema = defineSchema(
         v.literal("submitted"),
         v.literal("revision_requested"),
         v.literal("approved"),
-        v.literal("released")
+        v.literal("paid")
       ),
       deliverableUrl: v.optional(v.string()),
       submittedAt: v.optional(v.number()),
       approvedAt: v.optional(v.number()),
-      releasedAt: v.optional(v.number()),
       revisionNotes: v.optional(v.string()),
       aiVerificationStatus: v.optional(
         v.union(v.literal("pending"), v.literal("passed"), v.literal("failed"))
       ),
       aiVerificationResult: v.optional(v.string()),
-    }).index("by_projectId", ["projectId"]),
-
-    escrows: defineTable({
-      projectId: v.id("projects"),
-      clientId: v.id("users"),
-      freelancerId: v.id("users"),
-      totalAmount: v.number(),
-      releasedAmount: v.number(),
-      status: v.union(
-        v.literal("draft"),
-        v.literal("funded"),
-        v.literal("released")
-      ),
-      createdAt: v.number(),
-    }).index("by_projectId", ["projectId"]),
-
-    disputes: defineTable({
-      projectId: v.id("projects"),
-      milestoneId: v.id("milestones"),
-      clientId: v.id("users"),
-      freelancerId: v.id("users"),
-      title: v.string(),
-      description: v.string(),
-      clientEvidence: v.optional(v.string()),
-      freelancerEvidence: v.optional(v.string()),
-      status: v.union(
-        v.literal("open"),
-        v.literal("under_review"),
-        v.literal("resolved")
-      ),
-      outcome: v.optional(v.union(v.literal("client"), v.literal("freelancer"), v.literal("split"))),
-      resolution: v.optional(v.string()),
-      arbiterId: v.optional(v.id("users")),
-      createdAt: v.number(),
-      resolvedAt: v.optional(v.number()),
-    })
-      .index("by_projectId", ["projectId"])
-      .index("by_status", ["status"]),
+    }).index("by_contract", ["contractId"]),
   },
   {
     schemaValidation: false,

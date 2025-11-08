@@ -9,12 +9,9 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router";
 import "./index.css";
 import Landing from "./pages/Landing.tsx";
-import DashboardRouter from "./pages/DashboardRouter.tsx";
-import ProjectDetail from "./pages/ProjectDetail.tsx";
+import Dashboard from "./pages/Dashboard.tsx";
+import ContractDetail from "./pages/ContractDetail.tsx";
 import NotFound from "./pages/NotFound.tsx";
-import Projects from "./pages/Projects.tsx";
-import Escrows from "./pages/Escrows.tsx";
-import Transactions from "./pages/Transactions.tsx";
 import "./types/global.d.ts";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
@@ -52,11 +49,8 @@ createRoot(document.getElementById("root")!).render(
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<AuthPage redirectAfterAuth="/dashboard" />} />
-            <Route path="/dashboard/*" element={<DashboardRouter />} />
-            <Route path="/projects" element={<Projects />} />
-            <Route path="/projects/:projectId" element={<ProjectDetail />} />
-            <Route path="/escrows" element={<Escrows />} />
-            <Route path="/transactions" element={<Transactions />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/contracts/:contractId" element={<ContractDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
