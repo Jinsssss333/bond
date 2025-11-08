@@ -12,6 +12,7 @@ import Landing from "./pages/Landing.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import ContractDetail from "./pages/ContractDetail.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Projects from "./pages/Projects.tsx";
 import "./types/global.d.ts";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
@@ -50,6 +51,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<AuthPage redirectAfterAuth="/dashboard" />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/projects" element={<Projects />} />
             <Route path="/contracts/:contractId" element={<ContractDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
