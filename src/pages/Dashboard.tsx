@@ -232,24 +232,28 @@ export default function Dashboard() {
 
             {/* Stats Cards */}
             <div className="grid gap-6 md:grid-cols-3">
-              <Card>
+              <Card className="border-2">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     Active Projects
                   </CardTitle>
-                  <Briefcase className="h-5 w-5 text-primary" />
+                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Briefcase className="h-5 w-5 text-primary" />
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold">{activeContracts.length}</div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-2">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     Total in Escrow
                   </CardTitle>
-                  <DollarSign className="h-5 w-5 text-primary" />
+                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <DollarSign className="h-5 w-5 text-primary" />
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold">
@@ -258,12 +262,14 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-2">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     Open Disputes
                   </CardTitle>
-                  <AlertCircle className="h-5 w-5 text-primary" />
+                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <AlertCircle className="h-5 w-5 text-primary" />
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold">{openDisputes.length}</div>
@@ -272,7 +278,7 @@ export default function Dashboard() {
             </div>
 
             {/* Recent Activity */}
-            <Card>
+            <Card className="border-2">
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
               </CardHeader>
