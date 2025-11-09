@@ -276,7 +276,7 @@ export const deleteContract = mutation({
     if (contract.clientId !== userId) throw new Error("Only client can delete");
 
     // Check if freelancer has accepted
-    if (contract.status !== "pending_acceptance" && contract.status !== "pending_deletion") {
+    if (contract.status !== "pending_acceptance" && contract.status !== "pending_deletion" && contract.status !== "cancelled") {
       throw new Error("Cannot delete active contracts without freelancer confirmation");
     }
 
