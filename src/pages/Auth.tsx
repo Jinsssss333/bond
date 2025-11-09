@@ -18,7 +18,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, Loader2, Mail, Briefcase, Users, Scale } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 
@@ -38,7 +38,6 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const setRole = useMutation(api.users.setRole);
-  const allUsers = useQuery(api.users.currentUser);
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
@@ -56,7 +55,6 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
       const emailValue = formData.get("email") as string;
       setEmail(emailValue);
       
-      // Send OTP code
       await signIn("email-otp", formData);
       setStep({ email: emailValue });
       setIsLoading(false);
@@ -110,7 +108,6 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
       const formData = new FormData(event.currentTarget);
       await signIn("email-otp", formData);
 
-      // Wait a moment for auth to complete, then set role if signing up
       if (selectedRole) {
         await new Promise(resolve => setTimeout(resolve, 500));
         try {
@@ -131,6 +128,8 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
       setOtp("");
     }
   };
+
+  const currentEmail = typeof step === "object" && step.email ? step.email : email;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -272,7 +271,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                   </Button>
                 </CardContent>
               </>
-            ) : step === "signUp" && selectedRole ? (
+            ) : step === "signUp" ? (
               <>
                 <CardHeader className="text-center">
                   <div className="flex justify-center">
@@ -338,12 +337,12 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                 <CardHeader className="text-center mt-4">
                   <CardTitle>Check your email</CardTitle>
                   <CardDescription>
-                    We've sent a code to {typeof step === "object" && step.email ? step.email : email}
+                    We've sent a code to {currentEmail}
                   </CardDescription>
                 </CardHeader>
                 <form onSubmit={handleOtpSubmit}>
                   <CardContent className="pb-4">
-                    <input type="hidden" name="email" value={typeof step === "object" && step.email ? step.email : email} />
+                    <input type="hidden" name="email" value={currentEmail} />
                     <input type="hidden" name="code" value={otp} />
 
                     <div className="flex justify-center">
