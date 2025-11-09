@@ -17,6 +17,7 @@ export default function Dashboard() {
   const contracts = useQuery(api.contracts.list);
   const disputes = useQuery(api.disputes.list);
   const acceptContract = useMutation(api.contracts.acceptContract);
+  const rejectContract = useMutation(api.contracts.rejectContract);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -30,6 +31,15 @@ export default function Dashboard() {
       toast.success("Project invitation accepted!");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to accept invitation");
+    }
+  };
+
+  const handleRejectContract = async (contractId: string) => {
+    try {
+      await rejectContract({ contractId: contractId as Id<"contracts"> });
+      toast.success("Project invitation rejected");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to reject invitation");
     }
   };
 
@@ -177,6 +187,13 @@ export default function Dashboard() {
                           onClick={() => navigate(`/contracts/${contract._id}`)}
                         >
                           View Details
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleRejectContract(contract._id)}
+                        >
+                          Reject
                         </Button>
                       </div>
                     </div>

@@ -83,6 +83,25 @@ export const acceptContract = mutation({
   },
 });
 
+export const rejectContract = mutation({
+  args: { contractId: v.id("contracts") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    const contract = await ctx.db.get(args.contractId);
+    if (!contract) throw new Error("Contract not found");
+    if (contract.freelancerId !== userId) throw new Error("Only assigned freelancer can reject");
+    if (contract.status !== "pending_acceptance") throw new Error("Can only reject pending invitations");
+
+    await ctx.db.patch(args.contractId, {
+      status: "cancelled" as const,
+    });
+
+    return args.contractId;
+  },
+});
+
 export const list = query({
   args: {},
   handler: async (ctx) => {
