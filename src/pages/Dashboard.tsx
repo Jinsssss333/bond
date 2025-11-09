@@ -1,34 +1,19 @@
 import { useAuth } from "@/hooks/use-auth";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useNavigate } from "react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Plus, FileText, DollarSign, AlertCircle, LayoutDashboard, Briefcase, Lock, Receipt } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FileText, DollarSign, AlertCircle, LayoutDashboard, Briefcase, Lock, Receipt } from "lucide-react";
 import { LogoDropdown } from "@/components/LogoDropdown";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
 
 export default function Dashboard() {
   const { isLoading, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const contracts = useQuery(api.contracts.list);
   const disputes = useQuery(api.disputes.list);
-  const createContract = useMutation(api.contracts.create);
-
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [newContract, setNewContract] = useState({
-    title: "",
-    description: "",
-    freelancerEmail: "",
-    totalAmount: "",
-    currency: "USD",
-  });
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -47,44 +32,6 @@ export default function Dashboard() {
   const activeContracts = contracts?.filter((c) => c.status === "active") || [];
   const totalValue = contracts?.reduce((sum, c) => sum + c.currentAmount, 0) || 0;
   const openDisputes = disputes?.filter((d) => d.status === "open") || [];
-
-  const handleCreateContract = async () => {
-    try {
-      // Check if user has client role
-      if (user?.role !== "client") {
-        toast.error("Only clients can create contracts. Please sign in with a client role.");
-        return;
-      }
-
-      const amount = parseFloat(newContract.totalAmount);
-      if (!newContract.title || !newContract.description || !newContract.freelancerEmail || isNaN(amount)) {
-        toast.error("Please fill all fields with valid data");
-        return;
-      }
-
-      if (amount <= 0) {
-        toast.error("Total amount must be greater than 0");
-        return;
-      }
-
-      const contractId = await createContract({
-        title: newContract.title,
-        description: newContract.description,
-        freelancerEmail: newContract.freelancerEmail,
-        totalAmount: amount,
-        currency: newContract.currency,
-      });
-
-      toast.success("Contract created successfully");
-      setShowCreateDialog(false);
-      setNewContract({ title: "", description: "", freelancerEmail: "", totalAmount: "", currency: "USD" });
-      navigate(`/contracts/${contractId}`);
-    } catch (error: any) {
-      console.error("Contract creation error:", error);
-      const errorMessage = error?.message || "Failed to create contract";
-      toast.error(errorMessage);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -165,75 +112,10 @@ export default function Dashboard() {
             className="space-y-8"
           >
             {/* Welcome Section */}
-            <div className="flex items-center justify-between">
+            <div>
               <h2 className="text-3xl font-bold tracking-tight">
                 Welcome back, {user.name || user.email || "User"}!
               </h2>
-              <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-                <DialogTrigger asChild>
-                  <Button>
-                    Create Escrow
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Create New Contract</DialogTitle>
-                    <DialogDescription>
-                      Set up a new escrow contract with a freelancer
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium">Title</label>
-                      <Input
-                        value={newContract.title}
-                        onChange={(e) => setNewContract({ ...newContract, title: e.target.value })}
-                        placeholder="Contract title"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Description</label>
-                      <Textarea
-                        value={newContract.description}
-                        onChange={(e) => setNewContract({ ...newContract, description: e.target.value })}
-                        placeholder="Describe the project"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Freelancer Email</label>
-                      <Input
-                        type="email"
-                        value={newContract.freelancerEmail}
-                        onChange={(e) => setNewContract({ ...newContract, freelancerEmail: e.target.value })}
-                        placeholder="freelancer@example.com"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Total Amount</label>
-                      <Input
-                        type="number"
-                        value={newContract.totalAmount}
-                        onChange={(e) => setNewContract({ ...newContract, totalAmount: e.target.value })}
-                        placeholder="0.00"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Currency</label>
-                      <Input
-                        value={newContract.currency}
-                        onChange={(e) => setNewContract({ ...newContract, currency: e.target.value })}
-                        placeholder="USD"
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-                      Cancel
-                    </Button>
-                    <Button onClick={handleCreateContract}>Create Contract</Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
             </div>
 
             {/* Stats Cards */}
