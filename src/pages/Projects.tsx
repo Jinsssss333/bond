@@ -1,25 +1,82 @@
 import { useAuth } from "@/hooks/use-auth";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useNavigate } from "react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { LayoutDashboard, Briefcase, Lock, Receipt, FileText, AlertCircle } from "lucide-react";
 import { LogoDropdown } from "@/components/LogoDropdown";
+import { toast } from "sonner";
 
 export default function Projects() {
   const { isLoading, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const contracts = useQuery(api.contracts.list);
+  const createContract = useMutation(api.contracts.create);
+
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [newProject, setNewProject] = useState({
+    title: "",
+    description: "",
+    freelancerEmail: "",
+    totalAmount: "",
+    currency: "USD",
+  });
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       navigate("/auth");
     }
   }, [isLoading, isAuthenticated, navigate]);
+
+  const handleCreateProject = async () => {
+    try {
+      setIsCreating(true);
+      
+      if (!newProject.title || !newProject.description || !newProject.freelancerEmail || !newProject.totalAmount) {
+        toast.error("Please fill in all fields");
+        setIsCreating(false);
+        return;
+      }
+
+      const amount = parseFloat(newProject.totalAmount);
+      if (isNaN(amount) || amount <= 0) {
+        toast.error("Please enter a valid amount");
+        setIsCreating(false);
+        return;
+      }
+
+      await createContract({
+        title: newProject.title,
+        description: newProject.description,
+        freelancerEmail: newProject.freelancerEmail,
+        totalAmount: amount,
+        currency: newProject.currency,
+      });
+
+      toast.success("Project created successfully!");
+      setShowCreateDialog(false);
+      setNewProject({
+        title: "",
+        description: "",
+        freelancerEmail: "",
+        totalAmount: "",
+        currency: "USD",
+      });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to create project");
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   if (isLoading || !user) {
     return (
@@ -125,10 +182,71 @@ export default function Projects() {
             {/* Page Header */}
             <div className="flex items-center justify-between">
               <h2 className="text-3xl font-bold tracking-tight">Projects</h2>
-              <Button onClick={() => navigate("/dashboard")}>
+              <Button onClick={() => setShowCreateDialog(true)}>
                 Create New Project
               </Button>
             </div>
+
+            {/* Create Project Dialog */}
+            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle>Create New Project</DialogTitle>
+                  <DialogDescription>
+                    Enter the project details to create a new contract with a freelancer.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Project Title</Label>
+                    <Input
+                      id="title"
+                      placeholder="Enter project title"
+                      value={newProject.title}
+                      onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      placeholder="Describe the project"
+                      value={newProject.description}
+                      onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+                      rows={3}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="freelancerEmail">Freelancer Email</Label>
+                    <Input
+                      id="freelancerEmail"
+                      type="email"
+                      placeholder="freelancer@example.com"
+                      value={newProject.freelancerEmail}
+                      onChange={(e) => setNewProject({ ...newProject, freelancerEmail: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="totalAmount">Total Budget</Label>
+                    <Input
+                      id="totalAmount"
+                      type="number"
+                      placeholder="0.00"
+                      value={newProject.totalAmount}
+                      onChange={(e) => setNewProject({ ...newProject, totalAmount: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowCreateDialog(false)} disabled={isCreating}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleCreateProject} disabled={isCreating}>
+                    {isCreating ? "Creating..." : "Create Project"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
 
             {/* Projects Grid */}
             {!contracts || contracts.length === 0 ? (

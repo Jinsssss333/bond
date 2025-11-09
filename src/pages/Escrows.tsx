@@ -1,25 +1,81 @@
 import { useAuth } from "@/hooks/use-auth";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useNavigate } from "react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LayoutDashboard, Briefcase, Lock, Receipt, FileText, AlertCircle } from "lucide-react";
 import { LogoDropdown } from "@/components/LogoDropdown";
+import { toast } from "sonner";
+import { Id } from "@/convex/_generated/dataModel";
 
 export default function Escrows() {
   const { isLoading, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const escrows = useQuery(api.escrows.list);
   const contracts = useQuery(api.contracts.list);
+  const createEscrow = useMutation(api.escrows.create);
+
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [selectedContractId, setSelectedContractId] = useState<string>("");
+  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       navigate("/auth");
     }
   }, [isLoading, isAuthenticated, navigate]);
+
+  // Get contracts without escrows
+  const contractsWithoutEscrows = contracts?.filter((contract) => {
+    return !escrows?.some((escrow) => escrow.contractId === contract._id);
+  }) || [];
+
+  const handleCreateEscrow = () => {
+    if (contractsWithoutEscrows.length === 0) {
+      toast.error("No projects available without escrows. Please create a project first.");
+      return;
+    }
+    setShowCreateDialog(true);
+  };
+
+  const handleSubmitEscrow = async () => {
+    try {
+      setIsCreating(true);
+
+      if (!selectedContractId) {
+        toast.error("Please select a project");
+        setIsCreating(false);
+        return;
+      }
+
+      const selectedContract = contracts?.find((c) => c._id === selectedContractId);
+      if (!selectedContract) {
+        toast.error("Selected project not found");
+        setIsCreating(false);
+        return;
+      }
+
+      await createEscrow({
+        contractId: selectedContractId as Id<"contracts">,
+        amount: selectedContract.totalAmount,
+        currency: selectedContract.currency,
+      });
+
+      toast.success("Escrow created successfully!");
+      setShowCreateDialog(false);
+      setSelectedContractId("");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to create escrow");
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   if (isLoading || !user) {
     return (
@@ -130,10 +186,52 @@ export default function Escrows() {
             {/* Page Header */}
             <div className="flex items-center justify-between">
               <h2 className="text-3xl font-bold tracking-tight">All Escrows</h2>
-              <Button onClick={() => navigate("/dashboard")}>
+              <Button onClick={handleCreateEscrow}>
                 Create Escrow
               </Button>
             </div>
+
+            {/* Create Escrow Dialog */}
+            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Create Escrow</DialogTitle>
+                  <DialogDescription>
+                    Select a project to create an escrow for. Only projects without existing escrows are shown.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="project">Select Project</Label>
+                    <Select value={selectedContractId} onValueChange={setSelectedContractId}>
+                      <SelectTrigger id="project">
+                        <SelectValue placeholder="Choose a project" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {contractsWithoutEscrows.map((contract) => (
+                          <SelectItem key={contract._id} value={contract._id}>
+                            {contract.title} - ${contract.totalAmount.toLocaleString()} {contract.currency}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {contractsWithoutEscrows.length === 0 && (
+                      <p className="text-sm text-muted-foreground">
+                        No projects available. All projects already have escrows.
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowCreateDialog(false)} disabled={isCreating}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSubmitEscrow} disabled={isCreating || !selectedContractId}>
+                    {isCreating ? "Creating..." : "Create Escrow"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
 
             {/* Escrows Table */}
             {!escrows || escrows.length === 0 ? (
