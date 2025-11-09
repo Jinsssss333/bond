@@ -18,7 +18,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { ArrowRight, Loader2, Mail, Briefcase, Users, Scale } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { toast } from "sonner";
 
@@ -31,12 +31,14 @@ type Role = "client" | "freelancer" | "arbiter";
 function Auth({ redirectAfterAuth }: AuthProps = {}) {
   const { isLoading: authLoading, isAuthenticated, signIn } = useAuth();
   const navigate = useNavigate();
-  const [step, setStep] = useState<"role" | "signIn" | { email: string }>("role");
+  const [step, setStep] = useState<"signIn" | "signUp" | "role" | { email: string }>("signIn");
+  const [email, setEmail] = useState("");
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const setRole = useMutation(api.users.setRole);
+  const allUsers = useQuery(api.users.currentUser);
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
@@ -45,22 +47,52 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
     }
   }, [authLoading, isAuthenticated, navigate, redirectAfterAuth]);
 
-  const handleRoleSelect = (role: Role) => {
-    setSelectedRole(role);
-    setStep("signIn");
-  };
-
-  const handleEmailSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSignInSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
     try {
       const formData = new FormData(event.currentTarget);
+      const emailValue = formData.get("email") as string;
+      setEmail(emailValue);
+      
+      // Send OTP code
       await signIn("email-otp", formData);
-      setStep({ email: formData.get("email") as string });
+      setStep({ email: emailValue });
       setIsLoading(false);
     } catch (error) {
       console.error("Email sign-in error:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to send verification code. Please try again.",
+      );
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignUpClick = () => {
+    setStep("role");
+  };
+
+  const handleRoleSelect = (role: Role) => {
+    setSelectedRole(role);
+    setStep("signUp");
+  };
+
+  const handleSignUpSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    try {
+      const formData = new FormData(event.currentTarget);
+      const emailValue = formData.get("email") as string;
+      setEmail(emailValue);
+      await signIn("email-otp", formData);
+      setStep({ email: emailValue });
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Email sign-up error:", error);
       setError(
         error instanceof Error
           ? error.message
@@ -78,9 +110,8 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
       const formData = new FormData(event.currentTarget);
       await signIn("email-otp", formData);
 
-      // Wait a moment for auth to complete, then set role
+      // Wait a moment for auth to complete, then set role if signing up
       if (selectedRole) {
-        // Small delay to ensure auth is fully processed
         await new Promise(resolve => setTimeout(resolve, 500));
         try {
           await setRole({ role: selectedRole });
@@ -88,7 +119,6 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
         } catch (roleError) {
           console.error("Failed to set role:", roleError);
           toast.error("Authentication successful, but failed to set role. Please contact support.");
-          // Still navigate to dashboard even if role setting fails
         }
       }
 
@@ -104,11 +134,74 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Auth Content */}
       <div className="flex-1 flex items-center justify-center">
         <div className="flex items-center justify-center h-full flex-col">
           <Card className="min-w-[350px] pb-0 border shadow-md">
-            {step === "role" ? (
+            {step === "signIn" ? (
+              <>
+                <CardHeader className="text-center">
+                  <div className="flex justify-center">
+                    <img
+                      src="./logo.svg"
+                      alt="Lock Icon"
+                      width={64}
+                      height={64}
+                      className="rounded-lg mb-4 mt-4 cursor-pointer"
+                      onClick={() => navigate("/")}
+                    />
+                  </div>
+                  <CardTitle className="text-xl">Sign In</CardTitle>
+                  <CardDescription>
+                    Enter your email to continue
+                  </CardDescription>
+                </CardHeader>
+                <form onSubmit={handleSignInSubmit}>
+                  <CardContent>
+                    <div className="relative flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          name="email"
+                          placeholder="name@example.com"
+                          type="email"
+                          className="pl-9"
+                          disabled={isLoading}
+                          required
+                        />
+                      </div>
+                      <Button
+                        type="submit"
+                        variant="outline"
+                        size="icon"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <ArrowRight className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    {error && (
+                      <p className="mt-2 text-sm text-red-500">{error}</p>
+                    )}
+                    
+                    <div className="mt-4 text-center text-sm text-muted-foreground">
+                      Don't have an account?{" "}
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="p-0 h-auto"
+                        onClick={handleSignUpClick}
+                        disabled={isLoading}
+                      >
+                        Sign up
+                      </Button>
+                    </div>
+                  </CardContent>
+                </form>
+              </>
+            ) : step === "role" ? (
               <>
                 <CardHeader className="text-center">
                   <div className="flex justify-center">
@@ -168,9 +261,18 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                       I want to resolve disputes between parties
                     </span>
                   </Button>
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full mt-4"
+                    onClick={() => setStep("signIn")}
+                  >
+                    Back to Sign In
+                  </Button>
                 </CardContent>
               </>
-            ) : step === "signIn" ? (
+            ) : step === "signUp" && selectedRole ? (
               <>
                 <CardHeader className="text-center">
                   <div className="flex justify-center">
@@ -183,12 +285,12 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                       onClick={() => navigate("/")}
                     />
                   </div>
-                  <CardTitle className="text-xl">Sign In as {selectedRole}</CardTitle>
+                  <CardTitle className="text-xl">Sign Up as {selectedRole}</CardTitle>
                   <CardDescription>
-                    Enter your email to continue
+                    Enter your email to create an account
                   </CardDescription>
                 </CardHeader>
-                <form onSubmit={handleEmailSubmit}>
+                <form onSubmit={handleSignUpSubmit}>
                   <CardContent>
                     <div className="relative flex items-center gap-2">
                       <div className="relative flex-1">
@@ -236,12 +338,12 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                 <CardHeader className="text-center mt-4">
                   <CardTitle>Check your email</CardTitle>
                   <CardDescription>
-                    We've sent a code to {step.email}
+                    We've sent a code to {typeof step === "object" && step.email ? step.email : email}
                   </CardDescription>
                 </CardHeader>
                 <form onSubmit={handleOtpSubmit}>
                   <CardContent className="pb-4">
-                    <input type="hidden" name="email" value={step.email} />
+                    <input type="hidden" name="email" value={typeof step === "object" && step.email ? step.email : email} />
                     <input type="hidden" name="code" value={otp} />
 
                     <div className="flex justify-center">
