@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { LayoutDashboard, Briefcase, Lock, Receipt, FileText, AlertCircle, Settings as SettingsIcon } from "lucide-react";
+import { LayoutDashboard, Briefcase, Lock, Receipt, FileText, AlertCircle, Settings as SettingsIcon, Trash2 } from "lucide-react";
 import { LogoDropdown } from "@/components/LogoDropdown";
 import { toast } from "sonner";
 
@@ -20,9 +20,15 @@ export default function Projects() {
   const navigate = useNavigate();
   const contracts = useQuery(api.contracts.list);
   const createContract = useMutation(api.contracts.create);
+  const deleteContract = useMutation(api.contracts.deleteContract);
+  const requestDeletion = useMutation(api.contracts.requestDeletion);
+  const confirmDeletion = useMutation(api.contracts.confirmDeletion);
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [newProject, setNewProject] = useState({
     title: "",
     description: "",
@@ -78,6 +84,51 @@ export default function Projects() {
     }
   };
 
+  const handleDeleteClick = (contractId: string, status: string) => {
+    setSelectedContractId(contractId);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedContractId) return;
+
+    try {
+      setIsDeleting(true);
+      const contract = contracts?.find(c => c._id === selectedContractId);
+      
+      if (!contract) {
+        toast.error("Contract not found");
+        return;
+      }
+
+      if (contract.status === "pending_acceptance") {
+        // Direct deletion for pending contracts
+        await deleteContract({ contractId: selectedContractId as any });
+        toast.success("Project deleted successfully");
+      } else {
+        // Request deletion for active contracts
+        await requestDeletion({ contractId: selectedContractId as any });
+        toast.success("Deletion request sent to freelancer");
+      }
+
+      setShowDeleteDialog(false);
+      setSelectedContractId(null);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to delete project");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleConfirmDeletion = async (contractId: string) => {
+    try {
+      await confirmDeletion({ contractId: contractId as any });
+      toast.success("Deletion confirmed. Client can now delete the project.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to confirm deletion");
+    }
+  };
+
   if (isLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -87,6 +138,7 @@ export default function Projects() {
   }
 
   const isFreelancer = user.role === "freelancer";
+  const isClient = user.role === "client";
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -260,6 +312,28 @@ export default function Projects() {
               </DialogContent>
             </Dialog>
 
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Delete Project</DialogTitle>
+                  <DialogDescription>
+                    {contracts?.find(c => c._id === selectedContractId)?.status === "pending_acceptance"
+                      ? "Are you sure you want to delete this project? This action cannot be undone."
+                      : "This project has an active freelancer. A deletion request will be sent to them for confirmation."}
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowDeleteDialog(false)} disabled={isDeleting}>
+                    Cancel
+                  </Button>
+                  <Button variant="destructive" onClick={handleDeleteConfirm} disabled={isDeleting}>
+                    {isDeleting ? "Deleting..." : "Delete Project"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
             {/* Projects Grid */}
             {!contracts || contracts.length === 0 ? (
               <Card>
@@ -281,13 +355,38 @@ export default function Projects() {
                       <CardHeader>
                         <div className="flex items-start justify-between mb-2">
                           <CardTitle className="text-lg">{contract.title}</CardTitle>
-                          <Badge className={getStatusColor(contract.status)}>
-                            {contract.status}
-                          </Badge>
+                          <div className="flex gap-2">
+                            <Badge className={getStatusColor(contract.status)}>
+                              {contract.status}
+                            </Badge>
+                            {isClient && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={() => handleDeleteClick(contract._id, contract.status)}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            )}
+                          </div>
                         </div>
                         <CardDescription className="line-clamp-2">
                           {contract.description}
                         </CardDescription>
+                        {contract.status === "pending_deletion" && isFreelancer && (
+                          <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                            <p className="text-sm font-medium text-yellow-800">Deletion Requested</p>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="mt-2"
+                              onClick={() => handleConfirmDeletion(contract._id)}
+                            >
+                              Confirm Deletion
+                            </Button>
+                          </div>
+                        )}
                       </CardHeader>
                       <CardContent className="flex-1 flex flex-col justify-end">
                         <div className="flex items-end justify-between">

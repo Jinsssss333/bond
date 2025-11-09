@@ -50,7 +50,8 @@ const schema = defineSchema(
         v.literal("active"),
         v.literal("completed"),
         v.literal("disputed"),
-        v.literal("cancelled")
+        v.literal("cancelled"),
+        v.literal("pending_deletion")
       ),
       fundingStatus: v.union(
         v.literal("unfunded"),

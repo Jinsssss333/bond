@@ -222,3 +222,86 @@ export const fundContract = mutation({
     return args.contractId;
   },
 });
+
+export const requestDeletion = mutation({
+  args: { contractId: v.id("contracts") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    const contract = await ctx.db.get(args.contractId);
+    if (!contract) throw new Error("Contract not found");
+    if (contract.clientId !== userId) throw new Error("Only client can request deletion");
+
+    // Check if freelancer has accepted
+    if (contract.status === "pending_acceptance") {
+      throw new Error("Cannot request deletion for pending contracts. Delete directly instead.");
+    }
+
+    await ctx.db.patch(args.contractId, {
+      status: "pending_deletion" as any,
+    });
+
+    return args.contractId;
+  },
+});
+
+export const deleteContract = mutation({
+  args: { contractId: v.id("contracts") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    const contract = await ctx.db.get(args.contractId);
+    if (!contract) throw new Error("Contract not found");
+    if (contract.clientId !== userId) throw new Error("Only client can delete");
+
+    // Check if freelancer has accepted
+    if (contract.status !== "pending_acceptance" && contract.status !== "pending_deletion") {
+      throw new Error("Cannot delete active contracts without freelancer confirmation");
+    }
+
+    // Delete related milestones
+    const milestones = await ctx.db
+      .query("milestones")
+      .withIndex("by_contract", (q) => q.eq("contractId", args.contractId))
+      .collect();
+    
+    for (const milestone of milestones) {
+      await ctx.db.delete(milestone._id);
+    }
+
+    // Delete related escrows
+    const escrows = await ctx.db
+      .query("escrows")
+      .withIndex("by_contract", (q) => q.eq("contractId", args.contractId))
+      .collect();
+    
+    for (const escrow of escrows) {
+      await ctx.db.delete(escrow._id);
+    }
+
+    // Delete the contract
+    await ctx.db.delete(args.contractId);
+
+    return args.contractId;
+  },
+});
+
+export const confirmDeletion = mutation({
+  args: { contractId: v.id("contracts") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    const contract = await ctx.db.get(args.contractId);
+    if (!contract) throw new Error("Contract not found");
+    if (contract.freelancerId !== userId) throw new Error("Only freelancer can confirm");
+
+    await ctx.db.patch(args.contractId, {
+      status: "pending_deletion" as any,
+    });
+
+    return args.contractId;
+  },
+});
