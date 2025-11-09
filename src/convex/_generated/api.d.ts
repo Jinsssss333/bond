@@ -18,6 +18,7 @@ import type * as auth_emailOtp from "../auth/emailOtp.js";
 import type * as auth from "../auth.js";
 import type * as contracts from "../contracts.js";
 import type * as disputes from "../disputes.js";
+import type * as emails from "../emails.js";
 import type * as escrows from "../escrows.js";
 import type * as http from "../http.js";
 import type * as milestones from "../milestones.js";
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   contracts: typeof contracts;
   disputes: typeof disputes;
+  emails: typeof emails;
   escrows: typeof escrows;
   http: typeof http;
   milestones: typeof milestones;

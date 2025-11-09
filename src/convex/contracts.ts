@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { internal } from "./_generated/api";
 
 export const create = mutation({
   args: {
@@ -15,19 +16,20 @@ export const create = mutation({
     if (!userId) throw new Error("Not authenticated");
 
     const user = await ctx.db.get(userId);
-    if (user?.role !== "client") throw new Error("Only clients can create contracts");
+    if (!user) throw new Error("User not found");
+    if (user.role !== "client") throw new Error("Only clients can create contracts");
 
-    // Find freelancer by email
     const freelancer = await ctx.db
       .query("users")
       .withIndex("email", (q) => q.eq("email", args.freelancerEmail))
       .first();
 
     if (!freelancer) {
-      throw new Error(`No user found with email: ${args.freelancerEmail}. Please make sure the freelancer has registered.`);
+      throw new Error("Freelancer not found. They need to sign up first.");
     }
+
     if (freelancer.role !== "freelancer") {
-      throw new Error(`User ${args.freelancerEmail} is not registered as a freelancer. Their current role is: ${freelancer.role || "not set"}`);
+      throw new Error("The specified user is not a freelancer");
     }
 
     const contractId = await ctx.db.insert("contracts", {
@@ -36,22 +38,28 @@ export const create = mutation({
       clientId: userId,
       freelancerId: freelancer._id,
       totalAmount: args.totalAmount,
-      currency: args.currency,
-      status: "pending_acceptance" as const,
-      fundingStatus: "unfunded" as const,
-      createdBy: userId,
       currentAmount: 0,
+      currency: args.currency,
+      status: "pending_acceptance",
+      fundingStatus: "unfunded",
+      createdBy: userId,
     });
 
-    // Create escrow with random ID
-    const escrowId = `ESC-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
-    await ctx.db.insert("escrows", {
-      contractId,
-      amount: args.totalAmount,
-      currency: args.currency,
-      status: "pending" as const,
-      escrowId,
-    });
+    // Schedule email notification to be sent
+    await ctx.scheduler.runAfter(
+      0,
+      internal.emails.sendProjectInvitation,
+      {
+        freelancerEmail: args.freelancerEmail,
+        freelancerName: freelancer.name,
+        projectTitle: args.title,
+        projectDescription: args.description,
+        budget: args.totalAmount,
+        currency: args.currency,
+        contractId: contractId,
+        clientName: user.name,
+      }
+    );
 
     return contractId;
   },
