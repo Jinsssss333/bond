@@ -298,9 +298,28 @@ export const confirmDeletion = mutation({
     if (!contract) throw new Error("Contract not found");
     if (contract.freelancerId !== userId) throw new Error("Only freelancer can confirm");
 
-    await ctx.db.patch(args.contractId, {
-      status: "pending_deletion" as any,
-    });
+    // Delete related milestones
+    const milestones = await ctx.db
+      .query("milestones")
+      .withIndex("by_contract", (q) => q.eq("contractId", args.contractId))
+      .collect();
+    
+    for (const milestone of milestones) {
+      await ctx.db.delete(milestone._id);
+    }
+
+    // Delete related escrows
+    const escrows = await ctx.db
+      .query("escrows")
+      .withIndex("by_contract", (q) => q.eq("contractId", args.contractId))
+      .collect();
+    
+    for (const escrow of escrows) {
+      await ctx.db.delete(escrow._id);
+    }
+
+    // Delete the contract
+    await ctx.db.delete(args.contractId);
 
     return args.contractId;
   },
