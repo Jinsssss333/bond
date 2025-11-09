@@ -33,6 +33,7 @@ export default function ContractDetail() {
   const fundContract = useMutation(api.contracts.fundContract);
   const createMilestone = useMutation(api.milestones.create);
   const approveMilestone = useMutation(api.milestones.approve);
+  const acceptContract = useMutation(api.contracts.acceptContract);
 
   const [fundAmount, setFundAmount] = useState("");
   const [showMilestoneDialog, setShowMilestoneDialog] = useState(false);
@@ -57,7 +58,18 @@ export default function ContractDetail() {
   }
 
   const isClient = contract.clientId === user._id;
+  const isFreelancer = contract.freelancerId === user._id;
+  const isPending = contract.status === "pending_acceptance";
   const fundingProgress = (contract.currentAmount / contract.totalAmount) * 100;
+
+  const handleAcceptContract = async () => {
+    try {
+      await acceptContract({ contractId: contract._id });
+      toast.success("Project invitation accepted!");
+    } catch (error) {
+      toast.error("Failed to accept invitation");
+    }
+  };
 
   const handleFund = async () => {
     try {
@@ -139,18 +151,37 @@ export default function ContractDetail() {
               <h2 className="text-3xl font-bold tracking-tight">{contract.title}</h2>
               <p className="text-muted-foreground mt-2">{contract.description}</p>
             </div>
-            <Badge
-              variant={
-                contract.status === "active"
-                  ? "default"
-                  : contract.status === "completed"
-                  ? "secondary"
-                  : "outline"
-              }
-            >
-              {contract.status}
-            </Badge>
+            <div className="flex gap-2">
+              <Badge
+                variant={
+                  contract.status === "active"
+                    ? "default"
+                    : contract.status === "completed"
+                    ? "secondary"
+                    : "outline"
+                }
+              >
+                {contract.status}
+              </Badge>
+            </div>
           </div>
+
+          {/* Pending Invitation Alert for Freelancers */}
+          {isPending && isFreelancer && (
+            <Card className="border-2 border-primary/50 bg-primary/5">
+              <CardHeader>
+                <CardTitle>Project Invitation</CardTitle>
+                <CardDescription>
+                  You've been invited to work on this project. Review the details and accept to get started.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button onClick={handleAcceptContract} size="lg">
+                  Accept Project Invitation
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="grid gap-6 md:grid-cols-2">
             <Card>

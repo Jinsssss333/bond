@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/use-auth";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useNavigate } from "react-router";
 import { useEffect } from "react";
@@ -8,18 +8,30 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, DollarSign, AlertCircle, LayoutDashboard, Briefcase, Lock, Receipt } from "lucide-react";
 import { LogoDropdown } from "@/components/LogoDropdown";
+import { toast } from "sonner";
+import { Id } from "@/convex/_generated/dataModel";
 
 export default function Dashboard() {
   const { isLoading, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const contracts = useQuery(api.contracts.list);
   const disputes = useQuery(api.disputes.list);
+  const acceptContract = useMutation(api.contracts.acceptContract);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       navigate("/auth");
     }
   }, [isLoading, isAuthenticated, navigate]);
+
+  const handleAcceptContract = async (contractId: string) => {
+    try {
+      await acceptContract({ contractId: contractId as Id<"contracts"> });
+      toast.success("Project invitation accepted!");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to accept invitation");
+    }
+  };
 
   if (isLoading || !user) {
     return (
@@ -29,6 +41,8 @@ export default function Dashboard() {
     );
   }
 
+  const isFreelancer = user.role === "freelancer";
+  const pendingInvitations = contracts?.filter((c) => c.status === "pending_acceptance" && c.freelancerId === user._id) || [];
   const activeContracts = contracts?.filter((c) => c.status === "active") || [];
   const totalValue = contracts?.reduce((sum, c) => sum + c.currentAmount, 0) || 0;
   const openDisputes = disputes?.filter((d) => d.status === "open") || [];
@@ -117,6 +131,51 @@ export default function Dashboard() {
                 Welcome back, {user.name || user.email || "User"}!
               </h2>
             </div>
+
+            {/* Pending Invitations for Freelancers */}
+            {isFreelancer && pendingInvitations.length > 0 && (
+              <Card className="border-2 border-primary/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Briefcase className="h-5 w-5" />
+                    Pending Project Invitations
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {pendingInvitations.map((contract) => (
+                    <div
+                      key={contract._id}
+                      className="flex items-center justify-between p-4 border rounded-lg bg-muted/30"
+                    >
+                      <div className="flex-1">
+                        <h4 className="font-semibold">{contract.title}</h4>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {contract.description}
+                        </p>
+                        <p className="text-sm font-medium mt-2">
+                          Budget: ${contract.totalAmount.toLocaleString()} {contract.currency}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleAcceptContract(contract._id)}
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => navigate(`/contracts/${contract._id}`)}
+                        >
+                          View Details
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Stats Cards */}
             <div className="grid gap-6 md:grid-cols-3">

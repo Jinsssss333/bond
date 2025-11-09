@@ -86,6 +86,8 @@ export default function Projects() {
     );
   }
 
+  const isFreelancer = user.role === "freelancer";
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
@@ -182,9 +184,11 @@ export default function Projects() {
             {/* Page Header */}
             <div className="flex items-center justify-between">
               <h2 className="text-3xl font-bold tracking-tight">Projects</h2>
-              <Button onClick={() => setShowCreateDialog(true)}>
-                Create New Project
-              </Button>
+              {!isFreelancer && (
+                <Button onClick={() => setShowCreateDialog(true)}>
+                  Create New Project
+                </Button>
+              )}
             </div>
 
             {/* Create Project Dialog */}

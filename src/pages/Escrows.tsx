@@ -85,6 +85,8 @@ export default function Escrows() {
     );
   }
 
+  const isFreelancer = user.role === "freelancer";
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "funded":
@@ -186,9 +188,11 @@ export default function Escrows() {
             {/* Page Header */}
             <div className="flex items-center justify-between">
               <h2 className="text-3xl font-bold tracking-tight">All Escrows</h2>
-              <Button onClick={handleCreateEscrow}>
-                Create Escrow
-              </Button>
+              {!isFreelancer && (
+                <Button onClick={handleCreateEscrow}>
+                  Create Escrow
+                </Button>
+              )}
             </div>
 
             {/* Create Escrow Dialog */}
