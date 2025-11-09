@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Scale, DollarSign, LayoutDashboard, AlertCircle, FileText } from "lucide-react";
+import { Shield, Scale, DollarSign, LayoutDashboard, AlertCircle, FileText, Settings as SettingsIcon } from "lucide-react";
 import { LogoDropdown } from "@/components/LogoDropdown";
 
 export default function ArbiterDashboard() {
@@ -72,6 +72,14 @@ export default function ArbiterDashboard() {
         </nav>
 
         <div className="p-4 border-t space-y-2">
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-3"
+            onClick={() => navigate("/settings")}
+          >
+            <SettingsIcon className="h-5 w-5" />
+            Settings
+          </Button>
           <Button variant="ghost" className="w-full justify-start gap-3">
             <FileText className="h-5 w-5" />
             Developer

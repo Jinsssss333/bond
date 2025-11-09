@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LayoutDashboard, Briefcase, Lock, Receipt, FileText, AlertCircle } from "lucide-react";
+import { LayoutDashboard, Briefcase, Lock, Receipt, FileText, AlertCircle, Settings as SettingsIcon } from "lucide-react";
 import { LogoDropdown } from "@/components/LogoDropdown";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
@@ -154,6 +154,14 @@ export default function Escrows() {
         </nav>
 
         <div className="p-4 border-t space-y-2">
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-3"
+            onClick={() => navigate("/settings")}
+          >
+            <SettingsIcon className="h-5 w-5" />
+            Settings
+          </Button>
           <Button variant="ghost" className="w-full justify-start gap-3">
             <FileText className="h-5 w-5" />
             Developer

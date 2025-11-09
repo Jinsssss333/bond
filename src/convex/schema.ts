@@ -32,6 +32,8 @@ const schema = defineSchema(
       emailVerificationTime: v.optional(v.number()),
       isAnonymous: v.optional(v.boolean()),
       role: v.optional(roleValidator),
+      age: v.optional(v.number()),
+      company: v.optional(v.string()),
     }).index("email", ["email"]),
 
     contracts: defineTable({

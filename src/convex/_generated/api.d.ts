@@ -22,6 +22,7 @@ import type * as emails from "../emails.js";
 import type * as escrows from "../escrows.js";
 import type * as http from "../http.js";
 import type * as milestones from "../milestones.js";
+import type * as settings from "../settings.js";
 import type * as transactions from "../transactions.js";
 import type * as users from "../users.js";
 
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   escrows: typeof escrows;
   http: typeof http;
   milestones: typeof milestones;
+  settings: typeof settings;
   transactions: typeof transactions;
   users: typeof users;
 }>;

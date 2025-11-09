@@ -94,6 +94,14 @@ export default function Dashboard() {
         </nav>
 
         <div className="p-4 border-t space-y-2">
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-3"
+            onClick={() => navigate("/settings")}
+          >
+            <FileText className="h-5 w-5" />
+            Settings
+          </Button>
           <Button variant="ghost" className="w-full justify-start gap-3">
             <FileText className="h-5 w-5" />
             Developer

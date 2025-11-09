@@ -5,7 +5,7 @@ import { useNavigate } from "react-router";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Briefcase, Lock, Receipt, FileText, AlertCircle, ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import { LayoutDashboard, Briefcase, Lock, Receipt, FileText, AlertCircle, Settings as SettingsIcon, ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import { LogoDropdown } from "@/components/LogoDropdown";
 
 export default function Transactions() {
@@ -87,6 +87,14 @@ export default function Transactions() {
         </nav>
 
         <div className="p-4 border-t space-y-2">
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-3"
+            onClick={() => navigate("/settings")}
+          >
+            <SettingsIcon className="h-5 w-5" />
+            Settings
+          </Button>
           <Button variant="ghost" className="w-full justify-start gap-3">
             <FileText className="h-5 w-5" />
             Developer
