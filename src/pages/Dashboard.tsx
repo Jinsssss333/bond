@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, DollarSign, AlertCircle, LayoutDashboard, Briefcase, Lock, Receipt } from "lucide-react";
+import { FileText, DollarSign, AlertCircle, LayoutDashboard, Briefcase, Lock, Receipt, Settings } from "lucide-react";
 import { LogoDropdown } from "@/components/LogoDropdown";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
@@ -99,7 +99,7 @@ export default function Dashboard() {
             className="w-full justify-start gap-3"
             onClick={() => navigate("/settings")}
           >
-            <FileText className="h-5 w-5" />
+            <Settings className="h-5 w-5" />
             Settings
           </Button>
           <Button variant="ghost" className="w-full justify-start gap-3">
