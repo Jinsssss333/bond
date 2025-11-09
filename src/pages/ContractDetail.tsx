@@ -11,7 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, CheckCircle, XCircle, Clock, DollarSign } from "lucide-react";
+import { ArrowLeft, Plus, CheckCircle, XCircle, Clock, DollarSign, Upload, FileText, AlertTriangle } from "lucide-react";
 import { LogoDropdown } from "@/components/LogoDropdown";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
@@ -32,15 +32,37 @@ export default function ContractDetail() {
 
   const fundContract = useMutation(api.contracts.fundContract);
   const createMilestone = useMutation(api.milestones.create);
+  const submitDeliverable = useMutation(api.milestones.submitDeliverable);
   const approveMilestone = useMutation(api.milestones.approve);
+  const rejectMilestone = useMutation(api.milestones.reject);
   const acceptContract = useMutation(api.contracts.acceptContract);
+  const createDispute = useMutation(api.disputes.create);
+  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
 
   const [fundAmount, setFundAmount] = useState("");
   const [showMilestoneDialog, setShowMilestoneDialog] = useState(false);
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false);
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [showDisputeDialog, setShowDisputeDialog] = useState(false);
+  const [selectedMilestone, setSelectedMilestone] = useState<Id<"milestones"> | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  
   const [newMilestone, setNewMilestone] = useState({
     title: "",
     description: "",
     amount: "",
+  });
+
+  const [submitData, setSubmitData] = useState({
+    title: "",
+    description: "",
+  });
+
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [disputeData, setDisputeData] = useState({
+    reason: "",
+    evidence: "",
   });
 
   useEffect(() => {
@@ -114,12 +136,95 @@ export default function ContractDetail() {
     }
   };
 
+  const handleFileUpload = async (milestoneId: Id<"milestones">) => {
+    if (!uploadedFile || !submitData.title || !submitData.description) {
+      toast.error("Please fill all fields and upload a file");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      
+      // Generate upload URL
+      const uploadUrl = await generateUploadUrl();
+      
+      // Upload file
+      const result = await fetch(uploadUrl, {
+        method: "POST",
+        headers: { "Content-Type": uploadedFile.type },
+        body: uploadedFile,
+      });
+
+      const { storageId } = await result.json();
+
+      // Submit deliverable
+      await submitDeliverable({
+        milestoneId,
+        title: submitData.title,
+        description: submitData.description,
+        fileStorageId: storageId,
+      });
+
+      toast.success("Deliverable submitted successfully");
+      setShowSubmitDialog(false);
+      setUploadedFile(null);
+      setSubmitData({ title: "", description: "" });
+      setSelectedMilestone(null);
+    } catch (error) {
+      toast.error("Failed to submit deliverable");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleApproveMilestone = async (milestoneId: Id<"milestones">) => {
     try {
       await approveMilestone({ milestoneId });
       toast.success("Milestone approved");
     } catch (error) {
       toast.error("Failed to approve milestone");
+    }
+  };
+
+  const handleRejectMilestone = async () => {
+    if (!selectedMilestone || !rejectionReason) {
+      toast.error("Please provide a rejection reason");
+      return;
+    }
+
+    try {
+      await rejectMilestone({
+        milestoneId: selectedMilestone,
+        rejectionReason,
+      });
+      toast.success("Milestone rejected. Freelancer can resubmit.");
+      setShowRejectDialog(false);
+      setRejectionReason("");
+      setSelectedMilestone(null);
+    } catch (error) {
+      toast.error("Failed to reject milestone");
+    }
+  };
+
+  const handleRaiseDispute = async () => {
+    if (!disputeData.reason) {
+      toast.error("Please provide a reason for the dispute");
+      return;
+    }
+
+    try {
+      await createDispute({
+        contractId: contract._id,
+        milestoneId: selectedMilestone || undefined,
+        reason: disputeData.reason,
+        evidence: disputeData.evidence || undefined,
+      });
+      toast.success("Dispute raised successfully. An arbiter will review it.");
+      setShowDisputeDialog(false);
+      setDisputeData({ reason: "", evidence: "" });
+      setSelectedMilestone(null);
+    } catch (error) {
+      toast.error("Failed to raise dispute");
     }
   };
 
@@ -246,101 +351,170 @@ export default function ContractDetail() {
                   <CardTitle>Milestones</CardTitle>
                   <CardDescription>Track deliverables and payments</CardDescription>
                 </div>
-                <Dialog open={showMilestoneDialog} onOpenChange={setShowMilestoneDialog}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add Milestone
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Create Milestone</DialogTitle>
-                      <DialogDescription>
-                        Add a new milestone to this contract
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium">Title</label>
-                        <Input
-                          value={newMilestone.title}
-                          onChange={(e) =>
-                            setNewMilestone({ ...newMilestone, title: e.target.value })
-                          }
-                          placeholder="Milestone title"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">Description</label>
-                        <Textarea
-                          value={newMilestone.description}
-                          onChange={(e) =>
-                            setNewMilestone({ ...newMilestone, description: e.target.value })
-                          }
-                          placeholder="Describe the deliverable"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">Amount</label>
-                        <Input
-                          type="number"
-                          value={newMilestone.amount}
-                          onChange={(e) =>
-                            setNewMilestone({ ...newMilestone, amount: e.target.value })
-                          }
-                          placeholder="0.00"
-                        />
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setShowMilestoneDialog(false)}>
-                        Cancel
+                {isClient && (
+                  <Dialog open={showMilestoneDialog} onOpenChange={setShowMilestoneDialog}>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Milestone
                       </Button>
-                      <Button onClick={handleCreateMilestone}>Create</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Create Milestone</DialogTitle>
+                        <DialogDescription>
+                          Add a new milestone to this contract
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="text-sm font-medium">Title</label>
+                          <Input
+                            value={newMilestone.title}
+                            onChange={(e) =>
+                              setNewMilestone({ ...newMilestone, title: e.target.value })
+                            }
+                            placeholder="Milestone title"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">Description</label>
+                          <Textarea
+                            value={newMilestone.description}
+                            onChange={(e) =>
+                              setNewMilestone({ ...newMilestone, description: e.target.value })
+                            }
+                            placeholder="Describe the deliverable"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">Amount</label>
+                          <Input
+                            type="number"
+                            value={newMilestone.amount}
+                            onChange={(e) =>
+                              setNewMilestone({ ...newMilestone, amount: e.target.value })
+                            }
+                            placeholder="0.00"
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowMilestoneDialog(false)}>
+                          Cancel
+                        </Button>
+                        <Button onClick={handleCreateMilestone}>Create</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )}
               </div>
             </CardHeader>
             <CardContent>
               {!milestones || milestones.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No milestones yet. Create one to get started!</p>
+                  <p>No milestones yet. {isClient ? "Create one to get started!" : "Waiting for client to add milestones."}</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {milestones.map((milestone) => (
                     <div
                       key={milestone._id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
+                      className="p-4 border rounded-lg space-y-4"
                     >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-semibold">{milestone.title}</h4>
-                          <Badge variant="outline">{milestone.status}</Badge>
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold">{milestone.title}</h4>
+                            <Badge variant="outline">{milestone.status}</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {milestone.description}
+                          </p>
+                          {milestone.revisionNotes && (
+                            <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                              <p className="text-sm font-medium text-yellow-800">Revision Requested:</p>
+                              <p className="text-sm text-yellow-700">{milestone.revisionNotes}</p>
+                            </div>
+                          )}
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {milestone.description}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-4">
                         <div className="text-right">
                           <div className="font-semibold">
                             ${milestone.amount.toLocaleString()}
                           </div>
                         </div>
-                        {isClient && milestone.status === "submitted" && (
+                      </div>
+
+                      {/* Freelancer Actions */}
+                      {isFreelancer && (milestone.status === "pending" || milestone.status === "revision_requested") && (
+                        <div className="flex gap-2">
                           <Button
                             size="sm"
-                            onClick={() => handleApproveMilestone(milestone._id)}
+                            onClick={() => {
+                              setSelectedMilestone(milestone._id);
+                              setShowSubmitDialog(true);
+                            }}
                           >
-                            <CheckCircle className="mr-2 h-4 w-4" />
-                            Approve
+                            <Upload className="mr-2 h-4 w-4" />
+                            Submit Work
                           </Button>
-                        )}
-                      </div>
+                        </div>
+                      )}
+
+                      {/* Client Actions */}
+                      {isClient && milestone.status === "submitted" && (
+                        <div className="space-y-2">
+                          {milestone.deliverableUrl && (
+                            <div className="p-2 bg-muted rounded">
+                              <a
+                                href={milestone.deliverableUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-primary hover:underline flex items-center gap-2"
+                              >
+                                <FileText className="h-4 w-4" />
+                                View Submitted File
+                              </a>
+                            </div>
+                          )}
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => handleApproveMilestone(milestone._id)}
+                            >
+                              <CheckCircle className="mr-2 h-4 w-4" />
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedMilestone(milestone._id);
+                                setShowRejectDialog(true);
+                              }}
+                            >
+                              <XCircle className="mr-2 h-4 w-4" />
+                              Reject
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Dispute Button for Both Parties */}
+                      {(isClient || isFreelancer) && milestone.status !== "approved" && milestone.status !== "paid" && (
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => {
+                            setSelectedMilestone(milestone._id);
+                            setShowDisputeDialog(true);
+                          }}
+                        >
+                          <AlertTriangle className="mr-2 h-4 w-4" />
+                          Raise Dispute
+                        </Button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -348,6 +522,122 @@ export default function ContractDetail() {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* Submit Deliverable Dialog */}
+        <Dialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Submit Deliverable</DialogTitle>
+              <DialogDescription>
+                Upload your work for this milestone
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Title</label>
+                <Input
+                  value={submitData.title}
+                  onChange={(e) => setSubmitData({ ...submitData, title: e.target.value })}
+                  placeholder="Deliverable title"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Description</label>
+                <Textarea
+                  value={submitData.description}
+                  onChange={(e) => setSubmitData({ ...submitData, description: e.target.value })}
+                  placeholder="Describe what you've completed"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Upload File</label>
+                <Input
+                  type="file"
+                  onChange={(e) => setUploadedFile(e.target.files?.[0] || null)}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSubmitDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => selectedMilestone && handleFileUpload(selectedMilestone)}
+                disabled={isUploading}
+              >
+                {isUploading ? "Uploading..." : "Submit"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reject Dialog */}
+        <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reject Milestone</DialogTitle>
+              <DialogDescription>
+                Provide a reason for rejection so the freelancer can improve
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Textarea
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                placeholder="Explain what needs to be improved..."
+                rows={4}
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRejectDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleRejectMilestone}>
+                Reject & Request Revision
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dispute Dialog */}
+        <Dialog open={showDisputeDialog} onOpenChange={setShowDisputeDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Raise Dispute</DialogTitle>
+              <DialogDescription>
+                An arbiter will review your dispute and help resolve the issue
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Reason</label>
+                <Textarea
+                  value={disputeData.reason}
+                  onChange={(e) => setDisputeData({ ...disputeData, reason: e.target.value })}
+                  placeholder="Explain the issue..."
+                  rows={3}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Evidence (Optional)</label>
+                <Textarea
+                  value={disputeData.evidence}
+                  onChange={(e) => setDisputeData({ ...disputeData, evidence: e.target.value })}
+                  placeholder="Provide any supporting evidence..."
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDisputeDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleRaiseDispute}>
+                Raise Dispute
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );

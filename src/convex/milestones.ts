@@ -48,8 +48,9 @@ export const listByContract = query({
 export const submitDeliverable = mutation({
   args: {
     milestoneId: v.id("milestones"),
-    deliverableUrl: v.string(),
-    notes: v.optional(v.string()),
+    title: v.string(),
+    description: v.string(),
+    fileStorageId: v.id("_storage"),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -62,10 +63,15 @@ export const submitDeliverable = mutation({
     if (!contract) throw new Error("Contract not found");
     if (contract.freelancerId !== userId) throw new Error("Only freelancer can submit");
 
+    const fileUrl = await ctx.storage.getUrl(args.fileStorageId);
+    if (!fileUrl) throw new Error("File not found");
+
     await ctx.db.patch(args.milestoneId, {
-      deliverableUrl: args.deliverableUrl,
+      deliverableUrl: fileUrl,
       status: "submitted" as const,
       submittedAt: Date.now(),
+      title: args.title,
+      description: args.description,
     });
 
     return args.milestoneId;
@@ -116,6 +122,31 @@ export const approve = mutation({
       type: "release",
       status: "completed",
       description: `Released funds for milestone: ${milestone.title}`,
+    });
+
+    return args.milestoneId;
+  },
+});
+
+export const reject = mutation({
+  args: {
+    milestoneId: v.id("milestones"),
+    rejectionReason: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    const milestone = await ctx.db.get(args.milestoneId);
+    if (!milestone) throw new Error("Milestone not found");
+
+    const contract = await ctx.db.get(milestone.contractId);
+    if (!contract) throw new Error("Contract not found");
+    if (contract.clientId !== userId) throw new Error("Only client can reject");
+
+    await ctx.db.patch(args.milestoneId, {
+      status: "revision_requested" as const,
+      revisionNotes: args.rejectionReason,
     });
 
     return args.milestoneId;

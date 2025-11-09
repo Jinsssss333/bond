@@ -20,6 +20,7 @@ import type * as contracts from "../contracts.js";
 import type * as disputes from "../disputes.js";
 import type * as emails from "../emails.js";
 import type * as escrows from "../escrows.js";
+import type * as files from "../files.js";
 import type * as http from "../http.js";
 import type * as milestones from "../milestones.js";
 import type * as settings from "../settings.js";
@@ -42,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   disputes: typeof disputes;
   emails: typeof emails;
   escrows: typeof escrows;
+  files: typeof files;
   http: typeof http;
   milestones: typeof milestones;
   settings: typeof settings;

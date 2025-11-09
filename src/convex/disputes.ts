@@ -42,10 +42,23 @@ export const create = mutation({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
 
+    const contract = await ctx.db.get(args.contractId);
+    if (!contract) throw new Error("Contract not found");
+
+    // Verify user is part of the contract
+    if (contract.clientId !== userId && contract.freelancerId !== userId) {
+      throw new Error("Only contract parties can raise disputes");
+    }
+
     const disputeId = await ctx.db.insert("disputes", {
       ...args,
       raisedBy: userId,
       status: "open" as const,
+    });
+
+    // Update contract status to disputed
+    await ctx.db.patch(args.contractId, {
+      status: "disputed" as const,
     });
 
     return disputeId;
