@@ -306,6 +306,12 @@ export default function ContractDetail() {
                     ${contract.currentAmount.toLocaleString()} {contract.currency}
                   </span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Released Amount</span>
+                  <span className="font-semibold text-green-600">
+                    ${(milestones?.filter(m => m.status === "approved" || m.status === "paid").reduce((sum, m) => sum + m.amount, 0) || 0).toLocaleString()} {contract.currency}
+                  </span>
+                </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Funding Progress</span>

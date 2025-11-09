@@ -186,15 +186,15 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                     )}
                     
                     <div className="mt-4 text-center text-sm text-muted-foreground">
-                      Don't have an account?{" "}
+                      New to Bond?{" "}
                       <Button
                         type="button"
                         variant="link"
-                        className="p-0 h-auto"
+                        className="p-0 h-auto font-semibold"
                         onClick={handleSignUpClick}
                         disabled={isLoading}
                       >
-                        Sign up
+                        Create an account
                       </Button>
                     </div>
                   </CardContent>

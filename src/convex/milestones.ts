@@ -18,6 +18,21 @@ export const create = mutation({
     if (!contract) throw new Error("Contract not found");
     if (contract.clientId !== userId) throw new Error("Only client can create milestones");
 
+    // Calculate total milestone amount
+    const existingMilestones = await ctx.db
+      .query("milestones")
+      .withIndex("by_contract", (q) => q.eq("contractId", args.contractId))
+      .collect();
+    
+    const totalMilestoneAmount = existingMilestones.reduce((sum, m) => sum + m.amount, 0);
+    const newTotal = totalMilestoneAmount + args.amount;
+
+    if (newTotal > contract.totalAmount) {
+      throw new Error(
+        `Total milestone amount ($${newTotal.toLocaleString()}) exceeds project budget ($${contract.totalAmount.toLocaleString()})`
+      );
+    }
+
     const milestoneId = await ctx.db.insert("milestones", {
       ...args,
       status: "pending" as const,
