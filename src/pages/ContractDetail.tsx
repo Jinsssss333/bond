@@ -11,15 +11,23 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, CheckCircle, XCircle, Clock, DollarSign, Upload, FileText, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Plus, CheckCircle, XCircle, Clock, DollarSign, Upload, FileText, AlertTriangle, Wallet } from "lucide-react";
 import { LogoDropdown } from "@/components/LogoDropdown";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { parseUnits, formatUnits } from "viem";
+import { getUSDCAddress, usdcAbi } from "@/lib/contracts";
 
 export default function ContractDetail() {
   const { contractId } = useParams<{ contractId: string }>();
   const { isLoading, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+  
+  // Web3 hooks
+  const { address, isConnected, chain } = useAccount();
+  const { writeContract, data: hash, isPending: isWritePending } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
   
   const contract = useQuery(
     api.contracts.get,
@@ -44,6 +52,7 @@ export default function ContractDetail() {
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showDisputeDialog, setShowDisputeDialog] = useState(false);
+  const [showCryptoFundDialog, setShowCryptoFundDialog] = useState(false);
   const [selectedMilestone, setSelectedMilestone] = useState<Id<"milestones"> | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -71,6 +80,23 @@ export default function ContractDetail() {
     }
   }, [isLoading, isAuthenticated, navigate]);
 
+  // Handle successful blockchain transaction
+  useEffect(() => {
+    if (isConfirmed && hash && fundAmount && contract) {
+      const amount = parseFloat(fundAmount);
+      fundContract({
+        contractId: contract._id,
+        amount,
+      }).then(() => {
+        toast.success("Contract funded successfully via blockchain!");
+        setFundAmount("");
+        setShowCryptoFundDialog(false);
+      }).catch((error) => {
+        toast.error("Failed to record blockchain transaction");
+      });
+    }
+  }, [isConfirmed, hash, fundAmount, contract]);
+
   if (isLoading || !user || !contract) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -90,6 +116,45 @@ export default function ContractDetail() {
       toast.success("Project invitation accepted!");
     } catch (error) {
       toast.error("Failed to accept invitation");
+    }
+  };
+
+  const handleCryptoFund = async () => {
+    if (!isConnected) {
+      toast.error("Please connect your wallet first");
+      return;
+    }
+
+    const amount = parseFloat(fundAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
+
+    if (!chain) {
+      toast.error("Please connect to a supported network");
+      return;
+    }
+
+    try {
+      const usdcAddress = getUSDCAddress(chain.id);
+      const amountInWei = parseUnits(fundAmount, 6); // USDC has 6 decimals
+
+      // For demo purposes, we'll use the contract address as the escrow address
+      // In production, you'd have a dedicated escrow smart contract
+      const escrowAddress = contract.escrowWalletAddress || address;
+
+      toast.info("Please confirm the transaction in your wallet...");
+
+      writeContract({
+        address: usdcAddress,
+        abi: usdcAbi,
+        functionName: "transfer",
+        args: [escrowAddress as `0x${string}`, amountInWei],
+      });
+    } catch (error) {
+      console.error("Crypto funding error:", error);
+      toast.error("Failed to initiate blockchain transaction");
     }
   };
 
@@ -145,10 +210,8 @@ export default function ContractDetail() {
     try {
       setIsUploading(true);
       
-      // Generate upload URL
       const uploadUrl = await generateUploadUrl();
       
-      // Upload file
       const result = await fetch(uploadUrl, {
         method: "POST",
         headers: { "Content-Type": uploadedFile.type },
@@ -157,7 +220,6 @@ export default function ContractDetail() {
 
       const { storageId } = await result.json();
 
-      // Submit deliverable
       await submitDeliverable({
         milestoneId,
         title: submitData.title,
@@ -271,7 +333,6 @@ export default function ContractDetail() {
             </div>
           </div>
 
-          {/* Pending Invitation Alert for Freelancers */}
           {isPending && isFreelancer && (
             <Card className="border-2 border-primary/50 bg-primary/5">
               <CardHeader>
@@ -342,6 +403,22 @@ export default function ContractDetail() {
                       Fund
                     </Button>
                   </div>
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-background px-2 text-muted-foreground">Or</span>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => setShowCryptoFundDialog(true)}
+                  >
+                    <Wallet className="mr-2 h-4 w-4" />
+                    Fund with USDC (Crypto)
+                  </Button>
                   <p className="text-sm text-muted-foreground">
                     Remaining: ${(contract.totalAmount - contract.currentAmount).toLocaleString()}
                   </p>
@@ -452,7 +529,6 @@ export default function ContractDetail() {
                         </div>
                       </div>
 
-                      {/* Freelancer Actions */}
                       {isFreelancer && (milestone.status === "pending" || milestone.status === "revision_requested") && (
                         <div className="flex gap-2">
                           <Button
@@ -468,7 +544,6 @@ export default function ContractDetail() {
                         </div>
                       )}
 
-                      {/* Client Actions */}
                       {isClient && milestone.status === "submitted" && (
                         <div className="space-y-2">
                           {milestone.deliverableUrl && (
@@ -507,7 +582,6 @@ export default function ContractDetail() {
                         </div>
                       )}
 
-                      {/* Dispute Button for Both Parties */}
                       {(isClient || isFreelancer) && milestone.status !== "approved" && milestone.status !== "paid" && (
                         <Button
                           size="sm"
@@ -528,6 +602,65 @@ export default function ContractDetail() {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* Crypto Funding Dialog */}
+        <Dialog open={showCryptoFundDialog} onOpenChange={setShowCryptoFundDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Fund with USDC</DialogTitle>
+              <DialogDescription>
+                Use your connected wallet to fund this contract with USDC stablecoins
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {!isConnected ? (
+                <div className="text-center py-8">
+                  <Wallet className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p className="text-muted-foreground mb-4">Please connect your wallet to continue</p>
+                  <p className="text-sm text-muted-foreground">Use the wallet button in the header to connect</p>
+                </div>
+              ) : (
+                <>
+                  <div className="p-4 bg-muted rounded-lg space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Connected Wallet:</span>
+                      <span className="font-mono">{address?.slice(0, 6)}...{address?.slice(-4)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Network:</span>
+                      <span>{chain?.name || "Unknown"}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Amount (USDC)</label>
+                    <Input
+                      type="number"
+                      placeholder="0.00"
+                      value={fundAmount}
+                      onChange={(e) => setFundAmount(e.target.value)}
+                    />
+                  </div>
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      <strong>Note:</strong> This will transfer USDC from your wallet to the escrow. The transaction will be recorded on the blockchain.
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCryptoFundDialog(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleCryptoFund} 
+                disabled={!isConnected || isWritePending || isConfirming}
+              >
+                {isWritePending ? "Waiting for approval..." : isConfirming ? "Confirming..." : "Fund with USDC"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Submit Deliverable Dialog */}
         <Dialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
