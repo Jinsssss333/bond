@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LayoutDashboard, Briefcase, Lock, Receipt, FileText, AlertCircle, Settings as SettingsIcon, Shield, Scale, LogOut } from "lucide-react";
+import { LayoutDashboard, Briefcase, Lock, Receipt, FileText, AlertCircle, Settings as SettingsIcon, Shield, Scale, LogOut, Menu, X } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthActions } from "@convex-dev/auth/react";
 
@@ -18,6 +18,7 @@ export default function Settings() {
   const { signOut } = useAuthActions();
   const profile = useQuery(api.settings.getProfile);
   const updateProfile = useMutation(api.settings.updateProfile);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -82,51 +83,61 @@ export default function Settings() {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
-      <aside className="w-64 border-r bg-card flex flex-col">
-        <div className="p-6 border-b">
-          <button 
-            onClick={() => navigate("/")}
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-          >
-            <img src="/logo.svg" alt="Bond" width={32} height={32} className="rounded-lg" />
-            <span className="text-2xl font-bold tracking-tight text-primary">BOND</span>
-          </button>
-        </div>
-
-        <nav className="flex-1 p-4 space-y-2">
+      <aside className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-card transition-all duration-300 ease-in-out flex flex-col shadow-lg`}>
+        <div className="p-4 flex items-center justify-between">
+          {sidebarOpen && (
+            <button 
+              onClick={() => navigate("/")}
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            >
+              <img src="/logo.svg" alt="Bond" width={32} height={32} className="rounded-lg" />
+              <span className="text-2xl font-bold tracking-tight text-primary">BOND</span>
+            </button>
+          )}
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3"
+            size="icon"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="ml-auto"
+          >
+            {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+        </div>
+
+        <nav className="flex-1 p-3 space-y-1">
+          <Button
+            variant="ghost"
+            className={`w-full ${sidebarOpen ? 'justify-start' : 'justify-center'} gap-3`}
             onClick={() => navigate(isArbiter ? "/arbiter/dashboard" : "/dashboard")}
           >
             <LayoutDashboard className="h-5 w-5" />
-            Dashboard
+            {sidebarOpen && "Dashboard"}
           </Button>
           {!isArbiter && (
             <>
               <Button
                 variant="ghost"
-                className="w-full justify-start gap-3"
+                className={`w-full ${sidebarOpen ? 'justify-start' : 'justify-center'} gap-3`}
                 onClick={() => navigate("/projects")}
               >
                 <Briefcase className="h-5 w-5" />
-                Projects
+                {sidebarOpen && "Projects"}
               </Button>
               <Button
                 variant="ghost"
-                className="w-full justify-start gap-3"
+                className={`w-full ${sidebarOpen ? 'justify-start' : 'justify-center'} gap-3`}
                 onClick={() => navigate("/escrows")}
               >
                 <Lock className="h-5 w-5" />
-                Escrows
+                {sidebarOpen && "Escrows"}
               </Button>
               <Button
                 variant="ghost"
-                className="w-full justify-start gap-3"
+                className={`w-full ${sidebarOpen ? 'justify-start' : 'justify-center'} gap-3`}
                 onClick={() => navigate("/transactions")}
               >
                 <Receipt className="h-5 w-5" />
-                Transactions
+                {sidebarOpen && "Transactions"}
               </Button>
             </>
           )}
@@ -134,40 +145,40 @@ export default function Settings() {
             <>
               <Button
                 variant="ghost"
-                className="w-full justify-start gap-3"
+                className={`w-full ${sidebarOpen ? 'justify-start' : 'justify-center'} gap-3`}
                 onClick={() => navigate("/arbiter/disputes")}
               >
                 <Shield className="h-5 w-5" />
-                Disputes
+                {sidebarOpen && "Disputes"}
               </Button>
               <Button
                 variant="ghost"
-                className="w-full justify-start gap-3"
+                className={`w-full ${sidebarOpen ? 'justify-start' : 'justify-center'} gap-3`}
                 onClick={() => navigate("/arbiter/escrows")}
               >
                 <Scale className="h-5 w-5" />
-                All Escrows
+                {sidebarOpen && "All Escrows"}
               </Button>
             </>
           )}
         </nav>
 
-        <div className="p-4 border-t space-y-2">
+        <div className="p-3 space-y-1">
           <Button
             variant="default"
-            className="w-full justify-start gap-3"
+            className={`w-full ${sidebarOpen ? 'justify-start' : 'justify-center'} gap-3`}
             onClick={() => navigate("/settings")}
           >
             <SettingsIcon className="h-5 w-5" />
-            Settings
+            {sidebarOpen && "Settings"}
           </Button>
-          <Button variant="ghost" className="w-full justify-start gap-3">
+          <Button variant="ghost" className={`w-full ${sidebarOpen ? 'justify-start' : 'justify-center'} gap-3`}>
             <FileText className="h-5 w-5" />
-            Developer
+            {sidebarOpen && "Developer"}
           </Button>
-          <Button variant="ghost" className="w-full justify-start gap-3">
+          <Button variant="ghost" className={`w-full ${sidebarOpen ? 'justify-start' : 'justify-center'} gap-3`}>
             <AlertCircle className="h-5 w-5" />
-            Help & Support
+            {sidebarOpen && "Help & Support"}
           </Button>
         </div>
       </aside>
@@ -175,14 +186,14 @@ export default function Settings() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="border-b bg-card">
+        <header className="bg-card/50 backdrop-blur-sm shadow-sm">
           <div className="px-8 py-4 flex items-center justify-between">
-            <h1 className="text-sm text-muted-foreground">Bond - Guaranteed Payments</h1>
+            <h1 className="text-sm font-medium text-muted-foreground">Bond - Guaranteed Payments</h1>
           </div>
         </header>
 
         {/* Content */}
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-8 overflow-y-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -194,7 +205,7 @@ export default function Settings() {
               <p className="text-muted-foreground mt-2">Manage your profile information</p>
             </div>
 
-            <Card className="border-2">
+            <Card className="border shadow-md">
               <CardHeader>
                 <CardTitle>Profile Information</CardTitle>
                 <CardDescription>
@@ -293,7 +304,7 @@ export default function Settings() {
               </CardContent>
             </Card>
 
-            <Card className="border-2">
+            <Card className="border shadow-md">
               <CardHeader>
                 <CardTitle>Account Actions</CardTitle>
                 <CardDescription>
