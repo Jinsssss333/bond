@@ -18,7 +18,15 @@ export const summarizeFile = action({
 
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ 
+        model: "gemini-2.0-flash-exp",
+        generationConfig: {
+          temperature: 0.7,
+          topP: 0.95,
+          topK: 40,
+          maxOutputTokens: 1024,
+        },
+      });
 
       // Get file URL
       const fileUrl = await ctx.storage.getUrl(args.fileStorageId);
@@ -41,14 +49,27 @@ export const summarizeFile = action({
         mimeType = "text/plain";
       }
 
-      // Generate summary
-      const prompt = `Please analyze this file and provide a concise summary including:
-1. Main content/purpose
-2. Key points or findings
-3. Any deliverables or outcomes mentioned
-4. Overall quality assessment
+      // Enhanced prompt for better summarization
+      const prompt = `You are an expert project reviewer analyzing a freelancer's deliverable submission. 
 
-Keep the summary professional and under 200 words.`;
+Analyze this file thoroughly and provide a comprehensive yet concise summary in the following format:
+
+**📋 Overview**
+[Brief description of what this deliverable is]
+
+**🎯 Key Deliverables**
+[List the main items, features, or components delivered]
+
+**✨ Highlights**
+[Notable achievements, quality aspects, or standout elements]
+
+**📊 Completeness**
+[Assessment of whether the deliverable appears complete and meets professional standards]
+
+**💡 Recommendations**
+[Any suggestions for the client - approve, request revisions, or areas to verify]
+
+Keep the summary professional, objective, and under 250 words. Focus on actionable insights that help the client make an informed decision.`;
 
       const result = await model.generateContent([
         {
