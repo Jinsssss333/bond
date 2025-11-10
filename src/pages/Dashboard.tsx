@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, DollarSign, AlertCircle, LayoutDashboard, Briefcase, Lock, Receipt, Settings } from "lucide-react";
 import { LogoDropdown } from "@/components/LogoDropdown";
+import { WalletConnect } from "@/components/WalletConnect";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 
@@ -130,6 +131,7 @@ export default function Dashboard() {
           <div className="px-8 py-4 flex items-center justify-between">
             <h1 className="text-sm text-muted-foreground">Bond - Guaranteed Payments</h1>
             <div className="flex items-center gap-4">
+              <WalletConnect />
               <LogoDropdown />
             </div>
           </div>

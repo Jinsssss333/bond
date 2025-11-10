@@ -19,7 +19,6 @@ export default function Landing() {
             <span className="text-2xl font-bold tracking-tight">Bond</span>
           </div>
           <div className="flex items-center gap-4">
-            <WalletConnect />
             <Button onClick={() => navigate(isAuthenticated ? "/dashboard" : "/auth")} className="rounded-full">
               {isAuthenticated ? "Dashboard" : "Sign In"}
               <ArrowRight className="ml-2 h-4 w-4" />
