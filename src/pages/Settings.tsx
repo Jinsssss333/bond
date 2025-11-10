@@ -8,13 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LayoutDashboard, Briefcase, Lock, Receipt, FileText, AlertCircle, Settings as SettingsIcon, Shield, Scale } from "lucide-react";
-import { LogoDropdown } from "@/components/LogoDropdown";
+import { LayoutDashboard, Briefcase, Lock, Receipt, FileText, AlertCircle, Settings as SettingsIcon, Shield, Scale, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import { useAuthActions } from "@convex-dev/auth/react";
 
 export default function Settings() {
   const { isLoading, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+  const { signOut } = useAuthActions();
   const profile = useQuery(api.settings.getProfile);
   const updateProfile = useMutation(api.settings.updateProfile);
 
@@ -83,10 +84,13 @@ export default function Settings() {
       {/* Sidebar */}
       <aside className="w-64 border-r bg-card flex flex-col">
         <div className="p-6 border-b">
-          <div className="flex items-center gap-2">
+          <button 
+            onClick={() => navigate("/")}
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          >
             <img src="/logo.svg" alt="Bond" width={32} height={32} className="rounded-lg" />
             <span className="text-2xl font-bold tracking-tight text-primary">BOND</span>
-          </div>
+          </button>
         </div>
 
         <nav className="flex-1 p-4 space-y-2">
@@ -174,9 +178,6 @@ export default function Settings() {
         <header className="border-b bg-card">
           <div className="px-8 py-4 flex items-center justify-between">
             <h1 className="text-sm text-muted-foreground">Bond - Guaranteed Payments</h1>
-            <div className="flex items-center gap-4">
-              <LogoDropdown />
-            </div>
           </div>
         </header>
 
@@ -289,6 +290,32 @@ export default function Settings() {
                     Reset
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2">
+              <CardHeader>
+                <CardTitle>Account Actions</CardTitle>
+                <CardDescription>
+                  Manage your account settings
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  variant="destructive"
+                  onClick={async () => {
+                    try {
+                      await signOut();
+                      navigate("/");
+                      toast.success("Signed out successfully");
+                    } catch (error) {
+                      toast.error("Failed to sign out");
+                    }
+                  }}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </Button>
               </CardContent>
             </Card>
           </motion.div>

@@ -63,10 +63,13 @@ export default function Dashboard() {
       {/* Sidebar */}
       <aside className="w-64 border-r bg-card flex flex-col">
         <div className="p-6 border-b">
-          <div className="flex items-center gap-2">
+          <button 
+            onClick={() => navigate("/")}
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          >
             <img src="/logo.svg" alt="Bond" width={32} height={32} className="rounded-lg" />
             <span className="text-2xl font-bold tracking-tight text-primary">BOND</span>
-          </div>
+          </button>
         </div>
 
         <nav className="flex-1 p-4 space-y-2">
@@ -132,7 +135,6 @@ export default function Dashboard() {
             <h1 className="text-sm text-muted-foreground">Bond - Guaranteed Payments</h1>
             <div className="flex items-center gap-4">
               <WalletConnect />
-              <LogoDropdown />
             </div>
           </div>
         </header>
