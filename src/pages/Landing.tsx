@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { Shield, Lock, CheckCircle, Zap, ArrowRight } from "lucide-react";
 import { AuroraBackground } from "@/components/ui/aurora-background";
+import { WalletConnect } from "@/components/WalletConnect";
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ export default function Landing() {
             <span className="text-2xl font-bold tracking-tight">Bond</span>
           </div>
           <div className="flex items-center gap-4">
+            <WalletConnect />
             <Button onClick={() => navigate(isAuthenticated ? "/dashboard" : "/auth")} className="rounded-full">
               {isAuthenticated ? "Dashboard" : "Sign In"}
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -37,7 +39,7 @@ export default function Landing() {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border bg-muted/50 text-sm backdrop-blur-sm">
                 <Shield className="h-4 w-4" />
-                Secure Freelance Escrow Platform
+                Blockchain-Powered Escrow Platform
               </div>
               
               <motion.h1 
@@ -57,8 +59,8 @@ export default function Landing() {
                 transition={{ delay: 0.4, duration: 0.6 }}
                 className="text-xl text-muted-foreground max-w-2xl mx-auto"
               >
-                Bond provides secure escrow services for freelancers and clients with
-                milestone-based payments, AI verification, and complete transparency.
+                Bond provides secure blockchain escrow with USDC stablecoins for freelancers and clients with
+                milestone-based payments, smart contracts, and complete transparency.
               </motion.p>
             </motion.div>
           </section>
@@ -76,9 +78,9 @@ export default function Landing() {
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
                 <Lock className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-xl font-bold tracking-tight">Secure Escrow</h3>
+              <h3 className="text-xl font-bold tracking-tight">Blockchain Escrow</h3>
               <p className="text-muted-foreground">
-                Funds are held securely until milestones are completed and approved by both parties.
+                Funds held in smart contracts on Ethereum/Polygon until milestones are completed and approved.
               </p>
             </div>
 
@@ -86,9 +88,9 @@ export default function Landing() {
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
                 <CheckCircle className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-xl font-bold tracking-tight">Milestone Tracking</h3>
+              <h3 className="text-xl font-bold tracking-tight">USDC Payments</h3>
               <p className="text-muted-foreground">
-                Break projects into milestones with clear deliverables and payment schedules.
+                Pay with USDC stablecoin - no crypto volatility, just stable USD-pegged payments.
               </p>
             </div>
 
@@ -96,9 +98,9 @@ export default function Landing() {
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
                 <Zap className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-xl font-bold tracking-tight">AI Verification</h3>
+              <h3 className="text-xl font-bold tracking-tight">Web3 Wallets</h3>
               <p className="text-muted-foreground">
-                Automated deliverable verification using AI to ensure quality standards are met.
+                Connect MetaMask, WalletConnect, or Coinbase Wallet for secure crypto transactions.
               </p>
             </div>
           </motion.div>
@@ -116,7 +118,7 @@ export default function Landing() {
                 Ready to secure your next project?
               </h2>
               <p className="text-xl text-muted-foreground mb-8">
-                Join thousands of freelancers and clients who trust Bond for their escrow needs.
+                Join thousands of freelancers and clients who trust Bond for blockchain escrow.
               </p>
               <Button size="lg" onClick={() => navigate("/auth")}>
                 Get Started Now

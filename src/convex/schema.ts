@@ -34,7 +34,10 @@ const schema = defineSchema(
       role: v.optional(roleValidator),
       age: v.optional(v.number()),
       company: v.optional(v.string()),
-    }).index("email", ["email"]),
+      walletAddress: v.optional(v.string()),
+    })
+      .index("email", ["email"])
+      .index("by_wallet", ["walletAddress"]),
 
     contracts: defineTable({
       title: v.string(),
@@ -59,6 +62,9 @@ const schema = defineSchema(
         v.literal("fully_funded")
       ),
       createdBy: v.id("users"),
+      paymentMethod: v.optional(v.union(v.literal("fiat"), v.literal("crypto"))),
+      blockchainTxHash: v.optional(v.string()),
+      escrowWalletAddress: v.optional(v.string()),
     })
       .index("by_client", ["clientId"])
       .index("by_freelancer", ["freelancerId"]),
@@ -85,6 +91,7 @@ const schema = defineSchema(
         v.union(v.literal("pending"), v.literal("passed"), v.literal("failed"))
       ),
       aiVerificationResult: v.optional(v.string()),
+      blockchainTxHash: v.optional(v.string()),
     }).index("by_contract", ["contractId"]),
 
     escrows: defineTable({
@@ -101,6 +108,8 @@ const schema = defineSchema(
       ),
       fundedAt: v.optional(v.number()),
       releasedAt: v.optional(v.number()),
+      blockchainTxHash: v.optional(v.string()),
+      walletAddress: v.optional(v.string()),
     }).index("by_contract", ["contractId"]),
 
     disputes: defineTable({
@@ -142,6 +151,8 @@ const schema = defineSchema(
         v.literal("failed")
       ),
       description: v.string(),
+      blockchainTxHash: v.optional(v.string()),
+      paymentMethod: v.optional(v.union(v.literal("fiat"), v.literal("crypto"))),
     })
       .index("by_contract", ["contractId"])
       .index("by_from_user", ["fromUserId"])
