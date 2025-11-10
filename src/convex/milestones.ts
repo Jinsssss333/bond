@@ -85,8 +85,6 @@ export const submitDeliverable = mutation({
       deliverableUrl: fileUrl,
       status: "submitted" as const,
       submittedAt: Date.now(),
-      title: args.title,
-      description: args.description,
     });
 
     return args.milestoneId;

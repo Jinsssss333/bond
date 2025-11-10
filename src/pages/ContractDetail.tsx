@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/use-auth";
-import { useQuery, useMutation } from "convex/react";
+import { useAction, useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useNavigate, useParams } from "react-router";
 import { useEffect, useState } from "react";
@@ -47,6 +47,7 @@ export default function ContractDetail() {
   const acceptContract = useMutation(api.contracts.acceptContract);
   const createDispute = useMutation(api.disputes.create);
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
+  const summarizeFile = useAction(api.gemini.summarizeFile);
 
   const [fundAmount, setFundAmount] = useState("");
   const [showMilestoneDialog, setShowMilestoneDialog] = useState(false);
@@ -75,6 +76,9 @@ export default function ContractDetail() {
     reason: "",
     evidence: "",
   });
+
+  const [summaries, setSummaries] = useState<Record<string, string>>({});
+  const [loadingSummaries, setLoadingSummaries] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -289,6 +293,36 @@ export default function ContractDetail() {
       setSelectedMilestone(null);
     } catch (error) {
       toast.error("Failed to raise dispute");
+    }
+  };
+
+  const handleGenerateSummary = async (milestoneId: string, deliverableUrl: string) => {
+    if (!deliverableUrl) return;
+    
+    setLoadingSummaries(prev => ({ ...prev, [milestoneId]: true }));
+    
+    try {
+      // Extract storage ID from URL (assuming URL format)
+      const urlParts = deliverableUrl.split('/');
+      const storageId = urlParts[urlParts.length - 1];
+      
+      const result = await summarizeFile({
+        fileStorageId: storageId as Id<"_storage">,
+        fileName: "deliverable",
+        fileType: "application/pdf",
+      });
+      
+      if (result.success) {
+        setSummaries(prev => ({ ...prev, [milestoneId]: result.summary }));
+        toast.success("Summary generated successfully!");
+      } else {
+        toast.error("Failed to generate summary");
+      }
+    } catch (error) {
+      toast.error("Error generating summary");
+      console.error("Summary error:", error);
+    } finally {
+      setLoadingSummaries(prev => ({ ...prev, [milestoneId]: false }));
     }
   };
 
@@ -545,16 +579,36 @@ export default function ContractDetail() {
                       {isClient && milestone.status === "submitted" && (
                         <div className="space-y-2">
                           {milestone.deliverableUrl && (
-                            <div className="p-2 bg-muted rounded">
-                              <a
-                                href={milestone.deliverableUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm text-primary hover:underline flex items-center gap-2"
-                              >
-                                <FileText className="h-4 w-4" />
-                                View Submitted File
-                              </a>
+                            <div className="space-y-2">
+                              <div className="p-2 bg-muted rounded">
+                                <a
+                                  href={milestone.deliverableUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm text-primary hover:underline flex items-center gap-2"
+                                >
+                                  <FileText className="h-4 w-4" />
+                                  View Submitted File
+                                </a>
+                              </div>
+                              
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleGenerateSummary(milestone._id, milestone.deliverableUrl!)}
+                                  disabled={loadingSummaries[milestone._id]}
+                                >
+                                  {loadingSummaries[milestone._id] ? "Generating..." : "AI Summary"}
+                                </Button>
+                              </div>
+
+                              {summaries[milestone._id] && (
+                                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                  <p className="text-sm font-medium text-blue-900 mb-1">AI Summary:</p>
+                                  <p className="text-sm text-blue-800 whitespace-pre-wrap">{summaries[milestone._id]}</p>
+                                </div>
+                              )}
                             </div>
                           )}
                           <div className="flex gap-2">
