@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalMutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { internal } from "./_generated/api";
 
@@ -77,6 +77,56 @@ export const acceptContract = mutation({
 
     await ctx.db.patch(args.contractId, {
       status: "active" as const,
+    });
+
+    return args.contractId;
+  },
+});
+
+export const fundContract = mutation({
+  args: {
+    contractId: v.id("contracts"),
+    amount: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    const contract = await ctx.db.get(args.contractId);
+    if (!contract) throw new Error("Contract not found");
+    if (contract.clientId !== userId) throw new Error("Only client can fund");
+
+    const newAmount = contract.currentAmount + args.amount;
+
+    await ctx.db.patch(args.contractId, {
+      currentAmount: newAmount,
+      fundingStatus:
+        newAmount >= contract.totalAmount ? "fully_funded" : "partially_funded",
+    });
+
+    // Update escrow
+    const escrow = await ctx.db
+      .query("escrows")
+      .withIndex("by_contract", (q) => q.eq("contractId", args.contractId))
+      .first();
+
+    if (escrow) {
+      await ctx.db.patch(escrow._id, {
+        status: "funded" as const,
+        fundedAt: Date.now(),
+      });
+    }
+
+    // Create transaction record
+    await ctx.db.insert("transactions", {
+      contractId: args.contractId,
+      fromUserId: userId,
+      toUserId: contract.freelancerId,
+      amount: args.amount,
+      currency: contract.currency,
+      type: "funding",
+      status: "completed",
+      description: `Funded ${contract.title}`,
     });
 
     return args.contractId;
@@ -192,18 +242,16 @@ export const updateStatus = mutation({
   },
 });
 
-export const fundContract = mutation({
+export const fundContractInternal = internalMutation({
   args: {
     contractId: v.id("contracts"),
     amount: v.number(),
+    paymentMethod: v.union(v.literal("fiat"), v.literal("crypto")),
+    transactionId: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
     const contract = await ctx.db.get(args.contractId);
     if (!contract) throw new Error("Contract not found");
-    if (contract.clientId !== userId) throw new Error("Only client can fund");
 
     const newAmount = contract.currentAmount + args.amount;
 
@@ -211,9 +259,10 @@ export const fundContract = mutation({
       currentAmount: newAmount,
       fundingStatus:
         newAmount >= contract.totalAmount ? "fully_funded" : "partially_funded",
+      paymentMethod: args.paymentMethod,
     });
 
-    // Update escrow
+    // Update or create escrow
     const escrow = await ctx.db
       .query("escrows")
       .withIndex("by_contract", (q) => q.eq("contractId", args.contractId))
@@ -223,19 +272,32 @@ export const fundContract = mutation({
       await ctx.db.patch(escrow._id, {
         status: "funded" as const,
         fundedAt: Date.now(),
+        blockchainTxHash: args.paymentMethod === "fiat" ? args.transactionId : escrow.blockchainTxHash,
+      });
+    } else {
+      await ctx.db.insert("escrows", {
+        contractId: args.contractId,
+        escrowId: `ESC-${Math.random().toString(36).substring(2, 10).toUpperCase()}`,
+        amount: args.amount,
+        currency: contract.currency,
+        status: "funded" as const,
+        fundedAt: Date.now(),
+        blockchainTxHash: args.paymentMethod === "fiat" ? args.transactionId : undefined,
       });
     }
 
     // Create transaction record
     await ctx.db.insert("transactions", {
       contractId: args.contractId,
-      fromUserId: userId,
+      fromUserId: contract.clientId,
       toUserId: contract.freelancerId,
       amount: args.amount,
       currency: contract.currency,
       type: "funding",
       status: "completed",
-      description: `Funded ${contract.title}`,
+      description: `Funded ${contract.title} via ${args.paymentMethod}`,
+      paymentMethod: args.paymentMethod,
+      blockchainTxHash: args.paymentMethod === "fiat" ? args.transactionId : undefined,
     });
 
     return args.contractId;

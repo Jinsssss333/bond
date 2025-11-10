@@ -24,6 +24,7 @@ import type * as files from "../files.js";
 import type * as http from "../http.js";
 import type * as milestones from "../milestones.js";
 import type * as settings from "../settings.js";
+import type * as stripe from "../stripe.js";
 import type * as transactions from "../transactions.js";
 import type * as users from "../users.js";
 
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   milestones: typeof milestones;
   settings: typeof settings;
+  stripe: typeof stripe;
   transactions: typeof transactions;
   users: typeof users;
 }>;

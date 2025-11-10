@@ -18,6 +18,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { parseUnits, formatUnits } from "viem";
 import { getUSDCAddress, usdcAbi } from "@/lib/contracts";
+import { StripePaymentForm } from "@/components/StripePaymentForm";
 
 export default function ContractDetail() {
   const { contractId } = useParams<{ contractId: string }>();
@@ -53,6 +54,7 @@ export default function ContractDetail() {
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showDisputeDialog, setShowDisputeDialog] = useState(false);
   const [showCryptoFundDialog, setShowCryptoFundDialog] = useState(false);
+  const [showStripeFundDialog, setShowStripeFundDialog] = useState(false);
   const [selectedMilestone, setSelectedMilestone] = useState<Id<"milestones"> | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -391,18 +393,14 @@ export default function ContractDetail() {
                   <CardDescription>Add funds to the escrow</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex gap-2">
-                    <Input
-                      type="number"
-                      placeholder="Amount"
-                      value={fundAmount}
-                      onChange={(e) => setFundAmount(e.target.value)}
-                    />
-                    <Button onClick={handleFund}>
-                      <DollarSign className="mr-2 h-4 w-4" />
-                      Fund
-                    </Button>
-                  </div>
+                  <Button 
+                    variant="default" 
+                    className="w-full"
+                    onClick={() => setShowStripeFundDialog(true)}
+                  >
+                    <DollarSign className="mr-2 h-4 w-4" />
+                    Fund with Card (Stripe)
+                  </Button>
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                       <span className="w-full border-t" />
@@ -602,6 +600,51 @@ export default function ContractDetail() {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* Stripe Payment Dialog */}
+        <Dialog open={showStripeFundDialog} onOpenChange={setShowStripeFundDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Fund with Card</DialogTitle>
+              <DialogDescription>
+                Pay securely with your credit or debit card
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-muted rounded-lg space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Amount to fund:</span>
+                  <span className="font-semibold">${fundAmount || "0.00"} {contract.currency}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Remaining:</span>
+                  <span>${(contract.totalAmount - contract.currentAmount).toLocaleString()}</span>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Amount</label>
+                <Input
+                  type="number"
+                  placeholder="0.00"
+                  value={fundAmount}
+                  onChange={(e) => setFundAmount(e.target.value)}
+                />
+              </div>
+              {fundAmount && parseFloat(fundAmount) > 0 && (
+                <StripePaymentForm
+                  contractId={contract._id}
+                  amount={parseFloat(fundAmount)}
+                  currency={contract.currency}
+                  onSuccess={() => {
+                    setShowStripeFundDialog(false);
+                    setFundAmount("");
+                  }}
+                  onCancel={() => setShowStripeFundDialog(false)}
+                />
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Crypto Funding Dialog */}
         <Dialog open={showCryptoFundDialog} onOpenChange={setShowCryptoFundDialog}>
