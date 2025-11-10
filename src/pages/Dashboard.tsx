@@ -66,10 +66,9 @@ export default function Dashboard() {
           {sidebarOpen && (
             <button 
               onClick={() => navigate("/")}
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+              className="hover:opacity-80 transition-opacity"
             >
-              <img src="/logo.svg" alt="Bond" width={32} height={32} className="rounded-lg" />
-              <span className="text-2xl font-bold tracking-tight text-primary">BOND</span>
+              <img src="https://harmless-tapir-303.convex.cloud/api/storage/1c356e7a-069b-4ad1-9658-93f0d75a927e" alt="Bond" className="h-8" />
             </button>
           )}
           <Button
