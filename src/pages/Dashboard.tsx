@@ -68,7 +68,7 @@ export default function Dashboard() {
               onClick={() => navigate("/")}
               className="hover:opacity-80 transition-opacity"
             >
-              <img src="https://harmless-tapir-303.convex.cloud/api/storage/1c356e7a-069b-4ad1-9658-93f0d75a927e" alt="Bond" className="h-[400px]" />
+              <img src="https://harmless-tapir-303.convex.cloud/api/storage/1c356e7a-069b-4ad1-9658-93f0d75a927e" alt="Bond" className="h-8" />
             </button>
           )}
           <Button
