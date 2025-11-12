@@ -35,9 +35,17 @@ const schema = defineSchema(
       age: v.optional(v.number()),
       company: v.optional(v.string()),
       walletAddress: v.optional(v.string()),
+      polkadotAddress: v.optional(v.string()),
+      polkadotIdentity: v.optional(v.object({
+        display: v.optional(v.string()),
+        legal: v.optional(v.string()),
+        email: v.optional(v.string()),
+        verified: v.boolean(),
+      })),
     })
       .index("email", ["email"])
-      .index("by_wallet", ["walletAddress"]),
+      .index("by_wallet", ["walletAddress"])
+      .index("by_polkadot", ["polkadotAddress"]),
 
     contracts: defineTable({
       title: v.string(),
@@ -65,6 +73,12 @@ const schema = defineSchema(
       paymentMethod: v.optional(v.union(v.literal("fiat"), v.literal("crypto"))),
       blockchainTxHash: v.optional(v.string()),
       escrowWalletAddress: v.optional(v.string()),
+      paymentChain: v.optional(v.union(
+        v.literal("ethereum"),
+        v.literal("polygon"),
+        v.literal("polkadot"),
+        v.literal("kusama")
+      )),
     })
       .index("by_client", ["clientId"])
       .index("by_freelancer", ["freelancerId"]),

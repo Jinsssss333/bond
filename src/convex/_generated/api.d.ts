@@ -23,6 +23,7 @@ import type * as files from "../files.js";
 import type * as gemini from "../gemini.js";
 import type * as http from "../http.js";
 import type * as milestones from "../milestones.js";
+import type * as polkadot from "../polkadot.js";
 import type * as settings from "../settings.js";
 import type * as stripe from "../stripe.js";
 import type * as transactions from "../transactions.js";
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   gemini: typeof gemini;
   http: typeof http;
   milestones: typeof milestones;
+  polkadot: typeof polkadot;
   settings: typeof settings;
   stripe: typeof stripe;
   transactions: typeof transactions;

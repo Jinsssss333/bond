@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import { LayoutDashboard, Briefcase, Lock, Receipt, FileText, AlertCircle, Settings as SettingsIcon, Shield, Scale, LogOut, Menu, X } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthActions } from "@convex-dev/auth/react";
+import { PolkadotWalletConnect } from "@/components/PolkadotWalletConnect";
+import { getPolkadotIdentity } from "@/lib/polkadot";
 
 export default function Settings() {
   const { isLoading, isAuthenticated, user } = useAuth();
@@ -26,6 +28,34 @@ export default function Settings() {
     company: "",
   });
   const [isSaving, setIsSaving] = useState(false);
+
+  const [polkadotAddress, setPolkadotAddress] = useState("");
+  const [polkadotIdentity, setPolkadotIdentity] = useState<any>(null);
+  const linkPolkadot = useMutation(api.polkadot.linkPolkadotAddress);
+  const unlinkPolkadot = useMutation(api.polkadot.unlinkPolkadotAddress);
+  const polkadotInfo = useQuery(api.polkadot.getPolkadotInfo);
+
+  const handleLinkPolkadot = async (address: string) => {
+    try {
+      const identity = await getPolkadotIdentity(address);
+      await linkPolkadot({
+        polkadotAddress: address,
+        identity: identity || undefined,
+      });
+      toast.success("Polkadot address linked successfully!");
+    } catch (error) {
+      toast.error("Failed to link Polkadot address");
+    }
+  };
+
+  const handleUnlinkPolkadot = async () => {
+    try {
+      await unlinkPolkadot({});
+      toast.success("Polkadot address unlinked");
+    } catch (error) {
+      toast.error("Failed to unlink Polkadot address");
+    }
+  };
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -301,6 +331,55 @@ export default function Settings() {
                     Reset
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Polkadot Integration
+                </CardTitle>
+                <CardDescription>
+                  Link your Polkadot wallet for multi-chain payments and identity verification
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {polkadotInfo?.polkadotAddress ? (
+                  <div className="space-y-3">
+                    <div className="p-3 bg-muted rounded-lg">
+                      <p className="text-sm font-medium mb-1">Linked Address</p>
+                      <p className="font-mono text-sm">{polkadotInfo.polkadotAddress}</p>
+                    </div>
+                    {polkadotInfo.polkadotIdentity && (
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <p className="text-sm font-medium text-green-900 mb-2">
+                          {polkadotInfo.polkadotIdentity.verified ? "✓ Verified Identity" : "Identity Found"}
+                        </p>
+                        {polkadotInfo.polkadotIdentity.display && (
+                          <p className="text-sm text-green-800">
+                            Display: {polkadotInfo.polkadotIdentity.display}
+                          </p>
+                        )}
+                        {polkadotInfo.polkadotIdentity.legal && (
+                          <p className="text-sm text-green-800">
+                            Legal: {polkadotInfo.polkadotIdentity.legal}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    <Button variant="outline" onClick={handleUnlinkPolkadot}>
+                      Unlink Polkadot Wallet
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      Connect your Polkadot wallet to enable DOT payments and on-chain identity verification.
+                    </p>
+                    <PolkadotWalletConnect />
+                  </div>
+                )}
               </CardContent>
             </Card>
 
