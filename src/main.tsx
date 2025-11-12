@@ -6,7 +6,7 @@ import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
 import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router";
+import { BrowserRouter, Route, Routes, useLocation, Navigate } from "react-router";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
@@ -16,7 +16,6 @@ import "./index.css";
 import Landing from "./pages/Landing.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import ContractDetail from "./pages/ContractDetail.tsx";
-import NotFound from "./pages/NotFound.tsx";
 import Projects from "./pages/Projects.tsx";
 import Escrows from "./pages/Escrows.tsx";
 import Transactions from "./pages/Transactions.tsx";
@@ -74,7 +73,7 @@ createRoot(document.getElementById("root")!).render(
                   <Route path="/arbiter/dashboard" element={<ArbiterDashboard />} />
                   <Route path="/arbiter/disputes" element={<ArbiterDisputes />} />
                   <Route path="/arbiter/escrows" element={<ArbiterEscrows />} />
-                  <Route path="*" element={<NotFound />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </BrowserRouter>
               <Toaster />
