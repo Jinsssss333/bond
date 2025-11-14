@@ -4,8 +4,6 @@ import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { Shield, Lock, CheckCircle, Zap, ArrowRight } from "lucide-react";
 import { AuroraBackground } from "@/components/ui/aurora-background";
-import { WalletConnect } from "@/components/WalletConnect";
-import { PolkadotWalletConnect } from "@/components/PolkadotWalletConnect";
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -20,8 +18,6 @@ export default function Landing() {
             <span className="text-2xl font-bold tracking-tight">Bond</span>
           </div>
           <div className="flex items-center gap-3">
-            <WalletConnect />
-            <PolkadotWalletConnect />
             <Button onClick={() => navigate(isAuthenticated ? "/dashboard" : "/auth")} className="rounded-full">
               {isAuthenticated ? "Dashboard" : "Sign In"}
               <ArrowRight className="ml-2 h-4 w-4" />
