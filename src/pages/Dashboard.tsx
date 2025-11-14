@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, DollarSign, AlertCircle, LayoutDashboard, Briefcase, Lock, Receipt, Settings, Menu, X } from "lucide-react";
 import { WalletConnect } from "@/components/WalletConnect";
+import { PolkadotWalletConnect } from "@/components/PolkadotWalletConnect";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 
@@ -143,8 +144,9 @@ export default function Dashboard() {
         <header className="bg-card/50 backdrop-blur-sm shadow-sm">
           <div className="px-8 py-4 flex items-center justify-between">
             <h1 className="text-sm font-medium text-muted-foreground">Bond - Guaranteed Payments</h1>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <WalletConnect />
+              <PolkadotWalletConnect />
             </div>
           </div>
         </header>
