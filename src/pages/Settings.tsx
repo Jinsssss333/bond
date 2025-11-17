@@ -228,7 +228,7 @@ export default function Settings() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="max-w-2xl space-y-8"
+            className="max-w-3xl space-y-6"
           >
             <div>
               <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
@@ -236,13 +236,13 @@ export default function Settings() {
             </div>
 
             <Card className="border shadow-md">
-              <CardHeader>
+              <CardHeader className="pb-4">
                 <CardTitle>Profile Information</CardTitle>
                 <CardDescription>
                   Update your personal details and preferences
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
@@ -311,7 +311,7 @@ export default function Settings() {
                   </div>
                 )}
 
-                <div className="flex gap-3 pt-4">
+                <div className="flex gap-3 pt-2">
                   <Button onClick={handleSave} disabled={isSaving}>
                     {isSaving ? "Saving..." : "Save Changes"}
                   </Button>
@@ -335,13 +335,13 @@ export default function Settings() {
             </Card>
 
             <Card className="border shadow-md">
-              <CardHeader>
+              <CardHeader className="pb-4">
                 <CardTitle>Account Actions</CardTitle>
                 <CardDescription>
                   Manage your account settings
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pb-6">
                 <Button
                   variant="destructive"
                   onClick={async () => {
