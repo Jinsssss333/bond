@@ -144,10 +144,12 @@ export default function Dashboard() {
         <header className="bg-card/50 backdrop-blur-sm shadow-sm">
           <div className="px-8 py-4 flex items-center justify-between">
             <h1 className="text-sm font-medium text-muted-foreground">Bond - Guaranteed Payments</h1>
-            <div className="flex items-center gap-3">
-              <WalletConnect />
-              <PolkadotWalletConnect />
-            </div>
+            {user.role !== "arbiter" && (
+              <div className="flex items-center gap-3">
+                <WalletConnect />
+                <PolkadotWalletConnect />
+              </div>
+            )}
           </div>
         </header>
 

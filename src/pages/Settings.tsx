@@ -336,55 +336,6 @@ export default function Settings() {
 
             <Card className="border shadow-md">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  Polkadot Integration
-                </CardTitle>
-                <CardDescription>
-                  Link your Polkadot wallet for multi-chain payments and identity verification
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {polkadotInfo?.polkadotAddress ? (
-                  <div className="space-y-3">
-                    <div className="p-3 bg-muted rounded-lg">
-                      <p className="text-sm font-medium mb-1">Linked Address</p>
-                      <p className="font-mono text-sm">{polkadotInfo.polkadotAddress}</p>
-                    </div>
-                    {polkadotInfo.polkadotIdentity && (
-                      <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                        <p className="text-sm font-medium text-green-900 mb-2">
-                          {polkadotInfo.polkadotIdentity.verified ? "✓ Verified Identity" : "Identity Found"}
-                        </p>
-                        {polkadotInfo.polkadotIdentity.display && (
-                          <p className="text-sm text-green-800">
-                            Display: {polkadotInfo.polkadotIdentity.display}
-                          </p>
-                        )}
-                        {polkadotInfo.polkadotIdentity.legal && (
-                          <p className="text-sm text-green-800">
-                            Legal: {polkadotInfo.polkadotIdentity.legal}
-                          </p>
-                        )}
-                      </div>
-                    )}
-                    <Button variant="outline" onClick={handleUnlinkPolkadot}>
-                      Unlink Polkadot Wallet
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <p className="text-sm text-muted-foreground">
-                      Connect your Polkadot wallet to enable DOT/KSM payments and on-chain identity verification.
-                    </p>
-                    <PolkadotWalletConnect />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="border shadow-md">
-              <CardHeader>
                 <CardTitle>Account Actions</CardTitle>
                 <CardDescription>
                   Manage your account settings
