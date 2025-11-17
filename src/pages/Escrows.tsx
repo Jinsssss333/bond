@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LayoutDashboard, Briefcase, Lock, Receipt, FileText, AlertCircle, Settings as SettingsIcon } from "lucide-react";
+import { LayoutDashboard, Briefcase, Lock, Receipt, FileText, AlertCircle, Settings as SettingsIcon, Menu, X } from "lucide-react";
 import { LogoDropdown } from "@/components/LogoDropdown";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
@@ -21,6 +21,7 @@ export default function Escrows() {
   const contracts = useQuery(api.contracts.list);
   const createEscrow = useMutation(api.escrows.create);
 
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedContractId, setSelectedContractId] = useState<string>("");
   const [isCreating, setIsCreating] = useState(false);
@@ -110,65 +111,78 @@ export default function Escrows() {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
-      <aside className="w-64 border-r bg-card flex flex-col">
-        <div className="p-6 border-b">
-          <div className="flex items-center gap-2">
-            <img src="/logo.svg" alt="Bond" width={32} height={32} className="rounded-lg" />
-            <span className="text-2xl font-bold tracking-tight text-primary">BOND</span>
-          </div>
-        </div>
-
-        <nav className="flex-1 p-4 space-y-2">
+      <aside className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-card transition-all duration-300 ease-in-out flex flex-col shadow-lg`}>
+        <div className="p-4 flex items-center justify-between">
+          {sidebarOpen && (
+            <button 
+              onClick={() => navigate("/")}
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            >
+              <img src="/logo.svg" alt="Bond" width={32} height={32} className="rounded-lg" />
+              <span className="text-2xl font-bold tracking-tight text-primary">BOND</span>
+            </button>
+          )}
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3"
+            size="icon"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="ml-auto"
+          >
+            {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+        </div>
+
+        <nav className="flex-1 p-3 space-y-1">
+          <Button
+            variant="ghost"
+            className={`w-full ${sidebarOpen ? 'justify-start' : 'justify-center'} gap-3`}
             onClick={() => navigate("/dashboard")}
           >
             <LayoutDashboard className="h-5 w-5" />
-            Dashboard
+            {sidebarOpen && "Dashboard"}
           </Button>
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3"
+            className={`w-full ${sidebarOpen ? 'justify-start' : 'justify-center'} gap-3`}
             onClick={() => navigate("/projects")}
           >
             <Briefcase className="h-5 w-5" />
-            Projects
+            {sidebarOpen && "Projects"}
           </Button>
           <Button
             variant="default"
-            className="w-full justify-start gap-3"
+            className={`w-full ${sidebarOpen ? 'justify-start' : 'justify-center'} gap-3`}
             onClick={() => navigate("/escrows")}
           >
             <Lock className="h-5 w-5" />
-            Escrows
+            {sidebarOpen && "Escrows"}
           </Button>
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3"
+            className={`w-full ${sidebarOpen ? 'justify-start' : 'justify-center'} gap-3`}
             onClick={() => navigate("/transactions")}
           >
             <Receipt className="h-5 w-5" />
-            Transactions
+            {sidebarOpen && "Transactions"}
           </Button>
         </nav>
 
-        <div className="p-4 border-t space-y-2">
+        <div className="p-3 space-y-1">
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3"
+            className={`w-full ${sidebarOpen ? 'justify-start' : 'justify-center'} gap-3`}
             onClick={() => navigate("/settings")}
           >
             <SettingsIcon className="h-5 w-5" />
-            Settings
+            {sidebarOpen && "Settings"}
           </Button>
-          <Button variant="ghost" className="w-full justify-start gap-3">
+          <Button variant="ghost" className={`w-full ${sidebarOpen ? 'justify-start' : 'justify-center'} gap-3`}>
             <FileText className="h-5 w-5" />
-            Developer
+            {sidebarOpen && "Developer"}
           </Button>
-          <Button variant="ghost" className="w-full justify-start gap-3">
+          <Button variant="ghost" className={`w-full ${sidebarOpen ? 'justify-start' : 'justify-center'} gap-3`}>
             <AlertCircle className="h-5 w-5" />
-            Help & Support
+            {sidebarOpen && "Help & Support"}
           </Button>
         </div>
       </aside>
@@ -176,17 +190,14 @@ export default function Escrows() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="border-b bg-card">
-          <div className="px-8 py-4 flex items-center justify-between">
-            <h1 className="text-sm text-muted-foreground">Bond - Guaranteed Payments</h1>
-            <div className="flex items-center gap-4">
-              <LogoDropdown />
-            </div>
+        <header className="bg-card/50 backdrop-blur-sm">
+          <div className="px-8 py-4 flex items-center justify-end">
+            <LogoDropdown />
           </div>
         </header>
 
         {/* Content */}
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-8 overflow-y-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
