@@ -49,9 +49,10 @@ export default function Transactions() {
           {sidebarOpen && (
             <button 
               onClick={() => navigate("/")}
-              className="flex items-center hover:opacity-80 transition-opacity"
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              <img src="https://harmless-tapir-303.convex.cloud/api/storage/32373712-1cb1-4c27-a3bd-b4253dca2ae5" alt="Bond" width={140} height={47} className="object-contain" />
+              <img src="/logo.svg" alt="Bond" width={32} height={32} className="rounded-lg" />
+              <span className="text-2xl font-bold tracking-tight text-primary">BOND</span>
             </button>
           )}
           <Button
