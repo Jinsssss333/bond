@@ -38,13 +38,13 @@ Project uses pnpm as package manager
 
 Clone the repo:
 
-'git clone https://github.com/Jinsssss333/bond.git
-cd bond'
+`git clone https://github.com/Jinsssss333/bond.git
+cd bond`
 
 
 Install dependencies:
 
-'pnpm install'
+`pnpm install`
 
 
 Configure your environment variables using .env.example as reference. Key variables include:
@@ -57,7 +57,7 @@ Backend variables: JWKS, JWT_PRIVATE_KEY, SITE_URL
 
 Run the local development server:
 
-'pnpm dev'
+`pnpm dev`
 
 
 Open your browser at http://localhost:5173 (or whichever port Vite uses).
@@ -112,13 +112,13 @@ Use use node when writing Convex actions that access external connections. Separ
 
 Example CRUD usage:
 
-'import { crud } from "convex-helpers/server/crud";
-import schema from "./schema.ts";
+`import { crud } from "convex-helpers/server/crud";
+import schema from "./schema.ts";`
 
-export const { create, read, update, destroy } = crud(schema, "users");
+`export const { create, read, update, destroy } = crud(schema, "users");`
 
-// In an action:
-const user = await ctx.runQuery(internal.users.read, { id: userId });'
+`// In an action:
+const user = await ctx.runQuery(internal.users.read, { id: userId });`
 
 ## **Contributing**
 
