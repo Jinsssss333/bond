@@ -166,7 +166,7 @@ export default function Projects() {
               onClick={() => navigate("/")}
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              <img src="https://harmless-tapir-303.convex.cloud/api/storage/4fa9fa7a-0288-4db5-8094-46ed7097320f" alt="Bond" width={48} height={48} className="rounded-lg" />
+              <img src="https://harmless-tapir-303.convex.cloud/api/storage/4fa9fa7a-0288-4db5-8094-46ed7097320f" alt="Bond" width={48} height={48} className="rounded-lg bg-white p-1" />
               <span className="text-2xl font-bold tracking-tight text-primary">BOND</span>
             </button>
           )}
