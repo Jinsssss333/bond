@@ -375,7 +375,7 @@ export default function Settings() {
                 ) : (
                   <div className="space-y-3">
                     <p className="text-sm text-muted-foreground">
-                      Connect your Polkadot wallet to enable DOT payments and on-chain identity verification.
+                      Connect your Polkadot wallet to enable DOT/KSM payments and on-chain identity verification.
                     </p>
                     <PolkadotWalletConnect />
                   </div>
