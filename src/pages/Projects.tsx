@@ -167,7 +167,7 @@ export default function Projects() {
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <img src="/logo.svg" alt="Bond" width={32} height={32} className="rounded-lg" />
-              <span className="text-2xl font-bold tracking-tight text-primary">BOND</span>
+              <span className="text-2xl font-bold tracking-tight text-primary">Bond</span>
             </button>
           )}
           <Button
