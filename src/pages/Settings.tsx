@@ -11,8 +11,6 @@ import { Label } from "@/components/ui/label";
 import { LayoutDashboard, Briefcase, Lock, Receipt, FileText, AlertCircle, Settings as SettingsIcon, Shield, Scale, LogOut, Menu, X } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { PolkadotWalletConnect } from "@/components/PolkadotWalletConnect";
-import { getPolkadotIdentity } from "@/lib/polkadot";
 
 export default function Settings() {
   const { isLoading, isAuthenticated, user } = useAuth();
@@ -28,34 +26,6 @@ export default function Settings() {
     company: "",
   });
   const [isSaving, setIsSaving] = useState(false);
-
-  const [polkadotAddress, setPolkadotAddress] = useState("");
-  const [polkadotIdentity, setPolkadotIdentity] = useState<any>(null);
-  const linkPolkadot = useMutation(api.polkadot.linkPolkadotAddress);
-  const unlinkPolkadot = useMutation(api.polkadot.unlinkPolkadotAddress);
-  const polkadotInfo = useQuery(api.polkadot.getPolkadotInfo);
-
-  const handleLinkPolkadot = async (address: string) => {
-    try {
-      const identity = await getPolkadotIdentity(address);
-      await linkPolkadot({
-        polkadotAddress: address,
-        identity: identity || undefined,
-      });
-      toast.success("Polkadot address linked successfully!");
-    } catch (error) {
-      toast.error("Failed to link Polkadot address");
-    }
-  };
-
-  const handleUnlinkPolkadot = async () => {
-    try {
-      await unlinkPolkadot({});
-      toast.success("Polkadot address unlinked");
-    } catch (error) {
-      toast.error("Failed to unlink Polkadot address");
-    }
-  };
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -214,74 +184,67 @@ export default function Settings() {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <header className="bg-card/50 backdrop-blur-sm shadow-sm">
-          <div className="px-8 py-4 flex items-center justify-between">
-            <h1 className="text-sm font-medium text-muted-foreground">Bond - Guaranteed Payments</h1>
+      <div className="flex-1 p-6 overflow-y-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="max-w-4xl mx-auto space-y-6"
+        >
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
+            <p className="text-muted-foreground mt-1">Manage your profile information</p>
           </div>
-        </header>
 
-        {/* Content */}
-        <main className="flex-1 p-8 overflow-y-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="max-w-3xl space-y-6"
-          >
-            <div>
-              <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
-              <p className="text-muted-foreground mt-2">Manage your profile information</p>
-            </div>
-
+          <div className="grid gap-6 md:grid-cols-2">
             <Card className="border shadow-md">
-              <CardHeader className="pb-4">
-                <CardTitle>Profile Information</CardTitle>
-                <CardDescription>
-                  Update your personal details and preferences
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Profile Information</CardTitle>
+                <CardDescription className="text-sm">
+                  Update your personal details
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+              <CardContent className="space-y-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="email" className="text-sm">Email</Label>
                   <Input
                     id="email"
                     type="email"
                     value={profile.email}
                     disabled
-                    className="bg-muted"
+                    className="bg-muted h-9"
                   />
                   <p className="text-xs text-muted-foreground">
                     Email cannot be changed
                   </p>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="role">Role</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="role" className="text-sm">Role</Label>
                   <Input
                     id="role"
                     value={profile.role}
                     disabled
-                    className="bg-muted capitalize"
+                    className="bg-muted capitalize h-9"
                   />
                   <p className="text-xs text-muted-foreground">
                     Role cannot be changed
                   </p>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="name" className="text-sm">Name</Label>
                   <Input
                     id="name"
                     placeholder="Enter your name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="h-9"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="age">Age</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="age" className="text-sm">Age</Label>
                   <Input
                     id="age"
                     type="number"
@@ -290,12 +253,13 @@ export default function Settings() {
                     onChange={(e) => setFormData({ ...formData, age: e.target.value })}
                     min="0"
                     max="150"
+                    className="h-9"
                   />
                 </div>
 
                 {(isClient || isFreelancer) && (
-                  <div className="space-y-2">
-                    <Label htmlFor="company">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="company" className="text-sm">
                       {isClient ? "Company" : "Job Title / Specialization"}
                     </Label>
                     <Input
@@ -307,16 +271,18 @@ export default function Settings() {
                       }
                       value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                      className="h-9"
                     />
                   </div>
                 )}
 
-                <div className="flex gap-3 pt-2">
-                  <Button onClick={handleSave} disabled={isSaving}>
+                <div className="flex gap-2 pt-2">
+                  <Button onClick={handleSave} disabled={isSaving} size="sm">
                     {isSaving ? "Saving..." : "Save Changes"}
                   </Button>
                   <Button
                     variant="outline"
+                    size="sm"
                     onClick={() => {
                       if (profile) {
                         setFormData({
@@ -335,15 +301,16 @@ export default function Settings() {
             </Card>
 
             <Card className="border shadow-md">
-              <CardHeader className="pb-4">
-                <CardTitle>Account Actions</CardTitle>
-                <CardDescription>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Account Actions</CardTitle>
+                <CardDescription className="text-sm">
                   Manage your account settings
                 </CardDescription>
               </CardHeader>
-              <CardContent className="pb-6">
+              <CardContent>
                 <Button
                   variant="destructive"
+                  size="sm"
                   onClick={async () => {
                     try {
                       await signOut();
@@ -359,8 +326,8 @@ export default function Settings() {
                 </Button>
               </CardContent>
             </Card>
-          </motion.div>
-        </main>
+          </div>
+        </motion.div>
       </div>
     </div>
   );
