@@ -14,8 +14,7 @@ export default function Landing() {
       <header className="absolute top-0 left-0 right-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src="./logo.svg" alt="Bond" width={32} height={32} className="rounded-lg" />
-            <span className="text-2xl font-bold tracking-tight">Bond</span>
+            <img src="https://harmless-tapir-303.convex.cloud/api/storage/29aadbd1-f68c-49e8-873e-f882f98d3934" alt="Bond" height={40} className="h-10" />
           </div>
           <div className="flex items-center gap-3">
             <Button onClick={() => navigate(isAuthenticated ? "/dashboard" : "/auth")} className="rounded-full">
