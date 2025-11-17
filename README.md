@@ -4,7 +4,7 @@ A modern escrow-app built with a full-stack stack: frontend, backend, authentica
 
 ## **Why Bond Escrow**
 
-Bond Escrow is designed to provide a secure, user-friendly escrow platform. Whether you’re building a fintech app, marketplace, or trust-mediated transactional system, this project gives you a strong foundation:
+Bond Escrow is designed to provide a secure, user-friendly escrow platform. Whether you're building a fintech app, marketplace, or trust-mediated transactional system, this project gives you a strong foundation:
 
 React + Vite for fast frontend development
 
@@ -62,6 +62,28 @@ Run the local development server:
 
 Open your browser at http://localhost:5173 (or whichever port Vite uses).
 
+## **Deployment to Netlify**
+
+### Prerequisites
+1. A Netlify account (sign up at [netlify.com](https://netlify.com))
+2. All environment variables configured in Convex
+3. Your repository pushed to GitHub/GitLab/Bitbucket
+
+### Deployment Steps
+
+1. **Connect your repository to Netlify:**
+   - Log in to Netlify
+   - Click "Add new site" → "Import an existing project"
+   - Connect your Git provider and select this repository
+
+2. **Configure build settings:**
+   - Build command: `pnpm build`
+   - Publish directory: `dist`
+   - Node version: 18 or higher
+
+3. **Set environment variables in Netlify:**
+   Go to Site settings → Environment variables and add:
+   
 ## **Authentication & Authorization**
 
 Auth is already configured. Email-OTP flow and anonymous users are supported.
@@ -72,7 +94,7 @@ Protect routes by checking isAuthenticated and redirecting to /auth when needed.
 
 Backend: Use getCurrentUser() from src/convex/users.ts for server-side user context.
 
-Do not modify src/convex/auth/emailOtp.ts, auth.config.ts, or auth.ts unless you know what you’re doing.
+Do not modify src/convex/auth/emailOtp.ts, auth.config.ts, or auth.ts unless you know what you're doing.
 
 Use proper authorization checks on both frontend and backend to ensure secure access.
 
@@ -122,7 +144,7 @@ const user = await ctx.runQuery(internal.users.read, { id: userId });`
 
 ## **Contributing**
 
-Contributions are welcome! Whether you’re filing bug reports, proposing new features, or submitting pull requests — here’s how:
+Contributions are welcome! Whether you're filing bug reports, proposing new features, or submitting pull requests — here's how:
 
 Fork the repository
 
