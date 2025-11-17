@@ -1,256 +1,159 @@
-## Overview
+Bond Escrow
 
-This project uses the following tech stack:
-- Vite
-- Typescript
-- React Router v7 (all imports from `react-router` instead of `react-router-dom`)
-- React 19 (for frontend components)
-- Tailwind v4 (for styling)
-- Shadcn UI (for UI components library)
-- Lucide Icons (for icons)
-- Convex (for backend & database)
-- Convex Auth (for authentication)
-- Framer Motion (for animations)
+A modern escrow-app built with a full-stack stack: frontend, backend, authentication, and database.
 
-All relevant files live in the 'src' directory.
+🚀 Why Bond Escrow
 
-Use pnpm for the package manager.
+Bond Escrow is designed to provide a secure, user-friendly escrow platform. Whether you’re building a fintech app, marketplace, or trust-mediated transactional system, this project gives you a strong foundation:
 
-## Setup
+React + Vite for fast frontend development
 
-This project is set up already and running on a cloud environment, as well as a convex development in the sandbox.
+TypeScript across frontend and backend for type-safety
 
-## Environment Variables
+Convex for backend & database, with built-in real-time capabilities
 
-The project is set up with project specific CONVEX_DEPLOYMENT and VITE_CONVEX_URL environment variables on the client side.
+Email/OTP authentication out of the box
 
-The convex server has a separate set of environment variables that are accessible by the convex backend.
+Tailwind v4 + Shadcn UI for clean, extendable UI components
 
-Currently, these variables include auth-specific keys: JWKS, JWT_PRIVATE_KEY, and SITE_URL.
+Animations (Framer Motion) + customizable theme support
 
+🧰 Tech Stack
 
-# Using Authentication (Important!)
+Frontend: Vite + React + TypeScript
 
-You must follow these conventions when using authentication.
+Styling: Tailwind v4, Shadcn UI, Lucide Icons
 
-## Auth is already set up.
+Backend: Convex (database + serverless)
 
-All convex authentication functions are already set up. The auth currently uses email OTP and anonymous users, but can support more.
+Auth: Convex Auth (email OTP + anonymous users)
 
-The email OTP configuration is defined in `src/convex/auth/emailOtp.ts`. DO NOT MODIFY THIS FILE.
+Animations: Framer Motion
 
-Also, DO NOT MODIFY THESE AUTH FILES: `src/convex/auth.config.ts` and `src/convex/auth.ts`.
+Routing: React Router v7
 
-## Using Convex Auth on the backend
+Project uses pnpm as package manager
 
-On the `src/convex/users.ts` file, you can use the `getCurrentUser` function to get the current user's data.
+🔧 Quick Setup
 
-## Using Convex Auth on the frontend
+Clone the repo:
 
-The `/auth` page is already set up to use auth. Navigate to `/auth` for all log in / sign up sequences.
+git clone https://github.com/Jinsssss333/bond.git
+cd bond
 
-You MUST use this hook to get user data. Never do this yourself without the hook:
-```typescript
-import { useAuth } from "@/hooks/use-auth";
 
-const { isLoading, isAuthenticated, user, signIn, signOut } = useAuth();
-```
+Install dependencies:
 
-## Protected Routes
+pnpm install
 
-When protecting a page, use the auth hooks to check for authentication and redirect to /auth.
 
-## Auth Page
+Configure your environment variables using .env.example as reference. Key variables include:
 
-The auth page is defined in `src/pages/Auth.tsx`. Redirect authenticated pages and sign in / sign up to /auth.
+VITE_CONVEX_URL
 
-## Authorization
+CONVEX_DEPLOYMENT
 
-You can perform authorization checks on the frontend and backend.
+Backend variables: JWKS, JWT_PRIVATE_KEY, SITE_URL
 
-On the frontend, you can use the `useAuth` hook to get the current user's data and authentication state.
+Run the local development server:
 
-You should also be protecting queries, mutations, and actions at the base level, checking for authorization securely.
+pnpm dev
 
-## Adding a redirect after auth
 
-In `src/main.tsx`, you must add a redirect after auth URL to redirect to the correct dashboard/profile/page that should be created after authentication.
+Open your browser at http://localhost:5173 (or whichever port Vite uses).
 
-# Frontend Conventions
+🛡 Authentication & Authorization
 
-You will be using the Vite frontend with React 19, Tailwind v4, and Shadcn UI.
+Auth is already configured. Email-OTP flow and anonymous users are supported.
 
-Generally, pages should be in the `src/pages` folder, and components should be in the `src/components` folder.
+Frontend: Use the useAuth hook from @/hooks/use-auth to retrieve isLoading, isAuthenticated, user, signIn, signOut.
 
-Shadcn primitives are located in the `src/components/ui` folder and should be used by default.
+Protect routes by checking isAuthenticated and redirecting to /auth when needed.
 
-## Page routing
+Backend: Use getCurrentUser() from src/convex/users.ts for server-side user context.
 
-Your page component should go under the `src/pages` folder.
+Do not modify src/convex/auth/emailOtp.ts, auth.config.ts, or auth.ts unless you know what you’re doing.
 
-When adding a page, update the react router configuration in `src/main.tsx` to include the new route you just added.
+Use proper authorization checks on both frontend and backend to ensure secure access.
 
-## Shad CN conventions
+📂 Code Structure & Conventions
 
-Follow these conventions when using Shad CN components, which you should use by default.
-- Remember to use "cursor-pointer" to make the element clickable
-- For title text, use the "tracking-tight font-bold" class to make the text more readable
-- Always make apps MOBILE RESPONSIVE. This is important
-- AVOID NESTED CARDS. Try and not to nest cards, borders, components, etc. Nested cards add clutter and make the app look messy.
-- AVOID SHADOWS. Avoid adding any shadows to components. stick with a thin border without the shadow.
-- Avoid skeletons; instead, use the loader2 component to show a spinning loading state when loading data.
+src/pages/ – Your page components go here.
 
+src/components/ – Reusable UI components.
 
-## Landing Pages
+src/components/ui/ – Shadcn UI primitives and custom UI-wrappers.
 
-You must always create good-looking designer-level styles to your application. 
-- Make it well animated and fit a certain "theme", ie neo brutalist, retro, neumorphism, glass morphism, etc
+When adding a page, add its route in src/main.tsx.
 
-Use known images and emojis from online.
+Follow these UI guidelines:
 
-If the user is logged in already, show the get started button to say "Dashboard" or "Profile" instead to take them there.
+Use cursor-pointer on clickable elements
 
-## Responsiveness and formatting
+For title text: tracking-tight font-bold
 
-Make sure pages are wrapped in a container to prevent the width stretching out on wide screens. Always make sure they are centered aligned and not off-center.
+Avoid nested cards and heavy shadows — prefer simple borders
 
-Always make sure that your designs are mobile responsive. Verify the formatting to ensure it has correct max and min widths as well as mobile responsiveness.
+Always ensure mobile responsiveness (max/min widths, center alignment)
 
-- Always create sidebars for protected dashboard pages and navigate between pages
-- Always create navbars for landing pages
-- On these bars, the created logo should be clickable and redirect to the index page
+Implement dark/light mode via parent className theme switching
 
-## Animating with Framer Motion
+🧪 Backend (Convex) Details
 
-You must add animations to components using Framer Motion. It is already installed and configured in the project.
+Schema defined in src/convex/schema.ts.
 
-To use it, import the `motion` component from `framer-motion` and use it to wrap the component you want to animate.
+Do not include _id or _creationTime fields explicitly in queries — they are handled automatically.
 
+Document ID types: use Id<"TableName">, not plain string.
 
-### Other Items to animate
-- Fade in and Fade Out
-- Slide in and Slide Out animations
-- Rendering animations
-- Button clicks and UI elements
+Document object types: Doc<"TableName">.
 
-Animate for all components, including on landing page and app pages.
+Use use node when writing Convex actions that access external connections. Separate queries/mutations from external-connection actions.
 
-## Three JS Graphics
+Example CRUD usage:
 
-Your app comes with three js by default. You can use it to create 3D graphics for landing pages, games, etc.
-
-
-## Colors
-
-You can override colors in: `src/index.css`
-
-This uses the oklch color format for tailwind v4.
-
-Always use these color variable names.
-
-Make sure all ui components are set up to be mobile responsive and compatible with both light and dark mode.
-
-Set theme using `dark` or `light` variables at the parent className.
-
-## Styling and Theming
-
-When changing the theme, always change the underlying theme of the shad cn components app-wide under `src/components/ui` and the colors in the index.css file.
-
-Avoid hardcoding in colors unless necessary for a use case, and properly implement themes through the underlying shad cn ui components.
-
-When styling, ensure buttons and clickable items have pointer-click on them (don't by default).
-
-Always follow a set theme style and ensure it is tuned to the user's liking.
-
-## Toasts
-
-You should always use toasts to display results to the user, such as confirmations, results, errors, etc.
-
-Use the shad cn Sonner component as the toaster. For example:
-
-```
-import { toast } from "sonner"
-
-import { Button } from "@/components/ui/button"
-export function SonnerDemo() {
-  return (
-    <Button
-      variant="outline"
-      onClick={() =>
-        toast("Event has been created", {
-          description: "Sunday, December 03, 2023 at 9:00 AM",
-          action: {
-            label: "Undo",
-            onClick: () => console.log("Undo"),
-          },
-        })
-      }
-    >
-      Show Toast
-    </Button>
-  )
-}
-```
-
-Remember to import { toast } from "sonner". Usage: `toast("Event has been created.")`
-
-## Dialogs
-
-Always ensure your larger dialogs have a scroll in its content to ensure that its content fits the screen size. Make sure that the content is not cut off from the screen.
-
-Ideally, instead of using a new page, use a Dialog instead. 
-
-# Using the Convex backend
-
-You will be implementing the convex backend. Follow your knowledge of convex and the documentation to implement the backend.
-
-## The Convex Schema
-
-You must correctly follow the convex schema implementation.
-
-The schema is defined in `src/convex/schema.ts`.
-
-Do not include the `_id` and `_creationTime` fields in your queries (it is included by default for each table).
-Do not index `_creationTime` as it is indexed for you. Never have duplicate indexes.
-
-
-## Convex Actions: Using CRUD operations
-
-When running anything that involves external connections, you must use a convex action with "use node" at the top of the file.
-
-You cannot have queries or mutations in the same file as a "use node" action file. Thus, you must use pre-built queries and mutations in other files.
-
-You can also use the pre-installed internal crud functions for the database:
-
-```ts
-// in convex/users.ts
 import { crud } from "convex-helpers/server/crud";
 import schema from "./schema.ts";
 
 export const { create, read, update, destroy } = crud(schema, "users");
 
-// in some file, in an action:
+// In an action:
 const user = await ctx.runQuery(internal.users.read, { id: userId });
 
-await ctx.runMutation(internal.users.update, {
-  id: userId,
-  patch: {
-    status: "inactive",
-  },
-});
-```
+📝 Contributing
 
+Contributions are welcome! Whether you’re filing bug reports, proposing new features, or submitting pull requests — here’s how:
 
-## Common Convex Mistakes To Avoid
+Fork the repository
 
-When using convex, make sure:
-- Document IDs are referenced as `_id` field, not `id`.
-- Document ID types are referenced as `Id<"TableName">`, not `string`.
-- Document object types are referenced as `Doc<"TableName">`.
-- Keep schemaValidation to false in the schema file.
-- You must correctly type your code so that it passes the type checker.
-- You must handle null / undefined cases of your convex queries for both frontend and backend, or else it will throw an error that your data could be null or undefined.
-- Always use the `@/folder` path, with `@/convex/folder/file.ts` syntax for importing convex files.
-- This includes importing generated files like `@/convex/_generated/server`, `@/convex/_generated/api`
-- Remember to import functions like useQuery, useMutation, useAction, etc. from `convex/react`
-- NEVER have return type validators.
+Create your feature branch (git checkout -b feature/xyz)
+
+Commit your changes (git commit -m "Add …")
+
+Push to your branch (git push origin feature/xyz)
+
+Open a Pull Request
+
+Please follow existing code style, ensure UI responsiveness, write TypeScript types, and test your changes.
+
+📜 License
+
+Distributed under the MIT License.
+
+✅ Coming Soon / Roadmap
+
+Support additional authentication providers (e.g., OAuth)
+
+Escrow-specific workflow modules (e.g., Dispute resolution, Multi-party bonding)
+
+Admin dashboard for monitoring transactions
+
+Improved UI themes / presets
+
+Production deployment guide
+
+Questions?
+
+If you encounter issues or have feature requests, feel free to open an issue on the repo or contact the maintainer.
+
+Thanks for checking out Bond Escrow — happy coding! 🎉
