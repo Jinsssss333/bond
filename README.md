@@ -1,8 +1,8 @@
-Bond Escrow
+#**Bond Escrow**
 
 A modern escrow-app built with a full-stack stack: frontend, backend, authentication, and database.
 
-🚀 Why Bond Escrow
+# **Why Bond Escrow**
 
 Bond Escrow is designed to provide a secure, user-friendly escrow platform. Whether you’re building a fintech app, marketplace, or trust-mediated transactional system, this project gives you a strong foundation:
 
@@ -18,7 +18,7 @@ Tailwind v4 + Shadcn UI for clean, extendable UI components
 
 Animations (Framer Motion) + customizable theme support
 
-🧰 Tech Stack
+# **Tech Stack**
 
 Frontend: Vite + React + TypeScript
 
@@ -34,17 +34,17 @@ Routing: React Router v7
 
 Project uses pnpm as package manager
 
-🔧 Quick Setup
+#**Quick Setup**
 
 Clone the repo:
 
-git clone https://github.com/Jinsssss333/bond.git
-cd bond
+'git clone https://github.com/Jinsssss333/bond.git
+cd bond'
 
 
 Install dependencies:
 
-pnpm install
+'pnpm install'
 
 
 Configure your environment variables using .env.example as reference. Key variables include:
@@ -57,12 +57,12 @@ Backend variables: JWKS, JWT_PRIVATE_KEY, SITE_URL
 
 Run the local development server:
 
-pnpm dev
+'pnpm dev'
 
 
 Open your browser at http://localhost:5173 (or whichever port Vite uses).
 
-🛡 Authentication & Authorization
+#**Authentication & Authorization**
 
 Auth is already configured. Email-OTP flow and anonymous users are supported.
 
@@ -76,7 +76,7 @@ Do not modify src/convex/auth/emailOtp.ts, auth.config.ts, or auth.ts unless you
 
 Use proper authorization checks on both frontend and backend to ensure secure access.
 
-📂 Code Structure & Conventions
+#**Code Structure & Conventions**
 
 src/pages/ – Your page components go here.
 
@@ -98,7 +98,7 @@ Always ensure mobile responsiveness (max/min widths, center alignment)
 
 Implement dark/light mode via parent className theme switching
 
-🧪 Backend (Convex) Details
+**Backend (Convex) Details**
 
 Schema defined in src/convex/schema.ts.
 
@@ -112,15 +112,15 @@ Use use node when writing Convex actions that access external connections. Separ
 
 Example CRUD usage:
 
-import { crud } from "convex-helpers/server/crud";
+'import { crud } from "convex-helpers/server/crud";
 import schema from "./schema.ts";
 
 export const { create, read, update, destroy } = crud(schema, "users");
 
 // In an action:
-const user = await ctx.runQuery(internal.users.read, { id: userId });
+const user = await ctx.runQuery(internal.users.read, { id: userId });'
 
-📝 Contributing
+#**Contributing**
 
 Contributions are welcome! Whether you’re filing bug reports, proposing new features, or submitting pull requests — here’s how:
 
@@ -136,23 +136,23 @@ Open a Pull Request
 
 Please follow existing code style, ensure UI responsiveness, write TypeScript types, and test your changes.
 
-📜 License
+#**License**
 
 Distributed under the MIT License.
 
-✅ Coming Soon / Roadmap
+#**Coming Soon / Roadmap**
 
-Support additional authentication providers (e.g., OAuth)
+1.Support additional authentication providers (e.g., OAuth)
 
-Escrow-specific workflow modules (e.g., Dispute resolution, Multi-party bonding)
+2.Escrow-specific workflow modules (e.g., Dispute resolution, Multi-party bonding)
 
-Admin dashboard for monitoring transactions
+3.Admin dashboard for monitoring transactions
 
-Improved UI themes / presets
+4.Improved UI themes / presets
 
-Production deployment guide
+5.Production deployment guide
 
-Questions?
+#**Questions?**
 
 If you encounter issues or have feature requests, feel free to open an issue on the repo or contact the maintainer.
 
