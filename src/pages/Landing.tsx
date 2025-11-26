@@ -73,63 +73,63 @@ export default function Landing() {
               </motion.p>
             </motion.div>
           </section>
-        </AuroraBackground>
 
-        <section className="container mx-auto px-4 py-16 md:py-24 max-w-6xl">
-          <motion.div
-            {...animationProps}
-            className="grid md:grid-cols-3 gap-8"
-          >
-            <div className="space-y-4 p-6 border rounded-lg bg-card/50 backdrop-blur-sm">
-              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Lock className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold tracking-tight">Blockchain Escrow</h3>
-              <p className="text-muted-foreground">
-                Funds held in smart contracts on Ethereum/Polygon until milestones are completed and approved.
-              </p>
-            </div>
-
-            <div className="space-y-4 p-6 border rounded-lg bg-card/50 backdrop-blur-sm">
-              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                <CheckCircle className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold tracking-tight">USDC Payments</h3>
-              <p className="text-muted-foreground">
-                Pay with USDC stablecoin - no crypto volatility, just stable USD-pegged payments.
-              </p>
-            </div>
-
-            <div className="space-y-4 p-6 border rounded-lg bg-card/50 backdrop-blur-sm">
-              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Zap className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold tracking-tight">Web3 Wallets</h3>
-              <p className="text-muted-foreground">
-                Connect MetaMask, WalletConnect, or Coinbase Wallet for secure crypto transactions.
-              </p>
-            </div>
-          </motion.div>
-        </section>
-
-        <section className="border-t">
-          <div className="container mx-auto px-4 py-16 md:py-24 max-w-4xl text-center space-y-6">
+          <section className="container mx-auto px-4 py-16 md:py-24 max-w-6xl">
             <motion.div
               {...animationProps}
+              className="grid md:grid-cols-3 gap-8"
             >
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
-                Ready to secure your next project?
-              </h2>
-              <p className="text-lg md:text-xl text-muted-foreground mb-8">
-                Join thousands of freelancers and clients who trust Bond for blockchain escrow.
-              </p>
-              <Button size="lg" onClick={() => navigate("/auth")} className="w-full md:w-auto rounded-full">
-                Get Started Now
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+              <div className="space-y-4 p-6 border rounded-lg bg-card/50 backdrop-blur-sm">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Lock className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold tracking-tight">Blockchain Escrow</h3>
+                <p className="text-muted-foreground">
+                  Funds held in smart contracts on Ethereum/Polygon until milestones are completed and approved.
+                </p>
+              </div>
+
+              <div className="space-y-4 p-6 border rounded-lg bg-card/50 backdrop-blur-sm">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <CheckCircle className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold tracking-tight">USDC Payments</h3>
+                <p className="text-muted-foreground">
+                  Pay with USDC stablecoin - no crypto volatility, just stable USD-pegged payments.
+                </p>
+              </div>
+
+              <div className="space-y-4 p-6 border rounded-lg bg-card/50 backdrop-blur-sm">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Zap className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold tracking-tight">Web3 Wallets</h3>
+                <p className="text-muted-foreground">
+                  Connect MetaMask, WalletConnect, or Coinbase Wallet for secure crypto transactions.
+                </p>
+              </div>
             </motion.div>
-          </div>
-        </section>
+          </section>
+
+          <section className="border-t border-border/50">
+            <div className="container mx-auto px-4 py-16 md:py-24 max-w-4xl text-center space-y-6">
+              <motion.div
+                {...animationProps}
+              >
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+                  Ready to secure your next project?
+                </h2>
+                <p className="text-lg md:text-xl text-muted-foreground mb-8">
+                  Join thousands of freelancers and clients who trust Bond for blockchain escrow.
+                </p>
+                <Button size="lg" onClick={() => navigate("/auth")} className="w-full md:w-auto rounded-full">
+                  Get Started Now
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </motion.div>
+            </div>
+          </section>
+        </AuroraBackground>
       </main>
 
       <footer className="border-t">
