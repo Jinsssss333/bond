@@ -123,7 +123,7 @@ export default function Landing() {
               <p className="text-lg md:text-xl text-muted-foreground mb-8">
                 Join thousands of freelancers and clients who trust Bond for blockchain escrow.
               </p>
-              <Button size="lg" onClick={() => navigate("/auth")} className="w-full md:w-auto">
+              <Button size="lg" onClick={() => navigate("/auth")} className="w-full md:w-auto rounded-full">
                 Get Started Now
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
