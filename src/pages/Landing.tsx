@@ -26,7 +26,7 @@ export default function Landing() {
   };
 
   return (
-    <AuroraBackground className="overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden">
       <header className="absolute top-0 left-0 right-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -41,37 +41,39 @@ export default function Landing() {
         </div>
       </header>
 
-      <main className="flex-1 w-full">
-        <section className="container mx-auto px-4 py-24 max-w-6xl relative z-10">
-          <motion.div
-            {...animationProps}
-            className="text-center space-y-6"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border bg-muted/50 text-sm backdrop-blur-sm">
-              <Shield className="h-4 w-4" />
-              Blockchain-Powered Escrow Platform
-            </div>
-            
-            <motion.h1 
+      <main>
+        <AuroraBackground>
+          <section className="container mx-auto px-4 py-24 max-w-6xl relative z-10">
+            <motion.div
               {...animationProps}
-              transition={isMobile ? { duration: 0 } : { delay: 0.2, duration: 0.6 }}
-              className="text-4xl md:text-7xl font-bold tracking-tight"
+              className="text-center space-y-6"
             >
-              Trust in every
-              <br />
-              <span className="text-blue-600">freelance deal</span>
-            </motion.h1>
-            
-            <motion.p 
-              {...animationProps}
-              transition={isMobile ? { duration: 0 } : { delay: 0.4, duration: 0.6 }}
-              className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto"
-            >
-              Bond provides secure blockchain escrow with USDC stablecoins for freelancers and clients with
-              milestone-based payments, smart contracts, and complete transparency.
-            </motion.p>
-          </motion.div>
-        </section>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border bg-muted/50 text-sm backdrop-blur-sm">
+                <Shield className="h-4 w-4" />
+                Blockchain-Powered Escrow Platform
+              </div>
+              
+              <motion.h1 
+                {...animationProps}
+                transition={isMobile ? { duration: 0 } : { delay: 0.2, duration: 0.6 }}
+                className="text-4xl md:text-7xl font-bold tracking-tight"
+              >
+                Trust in every
+                <br />
+                <span className="text-blue-600">freelance deal</span>
+              </motion.h1>
+              
+              <motion.p 
+                {...animationProps}
+                transition={isMobile ? { duration: 0 } : { delay: 0.4, duration: 0.6 }}
+                className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto"
+              >
+                Bond provides secure blockchain escrow with USDC stablecoins for freelancers and clients with
+                milestone-based payments, smart contracts, and complete transparency.
+              </motion.p>
+            </motion.div>
+          </section>
+        </AuroraBackground>
 
         <section className="container mx-auto px-4 py-16 md:py-24 max-w-6xl">
           <motion.div
@@ -130,11 +132,11 @@ export default function Landing() {
         </section>
       </main>
 
-      <footer className="border-t w-full">
+      <footer className="border-t">
         <div className="container mx-auto px-4 py-8 text-center text-sm text-muted-foreground">
           <p>© 2024 Bond. All rights reserved.</p>
         </div>
       </footer>
-    </AuroraBackground>
+    </div>
   );
 }
