@@ -4,18 +4,33 @@ import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { Shield, Lock, CheckCircle, Zap, ArrowRight } from "lucide-react";
 import { AuroraBackground } from "@/components/ui/aurora-background";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Landing() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const isMobile = useIsMobile();
+
+  const animationProps = isMobile ? {
+    initial: { opacity: 1, y: 0 },
+    animate: { opacity: 1, y: 0 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true },
+    transition: { duration: 0 }
+  } : {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true },
+    transition: { duration: 0.6 }
+  };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-x-hidden">
       <header className="absolute top-0 left-0 right-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src="./logo.svg" alt="Bond" width={32} height={32} className="rounded-lg" />
-            <span className="text-2xl font-bold tracking-tight">Bond</span>
+            <img src="https://harmless-tapir-303.convex.cloud/api/storage/32373712-1cb1-4c27-a3bd-b4253dca2ae5" alt="Bond" width={150} height={50} className="object-contain bg-white p-1 rounded-lg" />
           </div>
           <div className="flex items-center gap-3">
             <Button onClick={() => navigate(isAuthenticated ? "/dashboard" : "/auth")} className="rounded-full">
@@ -30,9 +45,7 @@ export default function Landing() {
         <AuroraBackground>
           <section className="container mx-auto px-4 py-24 max-w-6xl relative z-10">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              {...animationProps}
               className="text-center space-y-6"
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border bg-muted/50 text-sm backdrop-blur-sm">
@@ -41,21 +54,19 @@ export default function Landing() {
               </div>
               
               <motion.h1 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.6 }}
-                className="text-5xl md:text-7xl font-bold tracking-tight"
+                {...animationProps}
+                transition={isMobile ? { duration: 0 } : { delay: 0.2, duration: 0.6 }}
+                className="text-4xl md:text-7xl font-bold tracking-tight"
               >
                 Trust in every
                 <br />
-                <span className="text-primary">freelance deal</span>
+                <span className="text-blue-600">freelance deal</span>
               </motion.h1>
               
               <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.6 }}
-                className="text-xl text-muted-foreground max-w-2xl mx-auto"
+                {...animationProps}
+                transition={isMobile ? { duration: 0 } : { delay: 0.4, duration: 0.6 }}
+                className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto"
               >
                 Bond provides secure blockchain escrow with USDC stablecoins for freelancers and clients with
                 milestone-based payments, smart contracts, and complete transparency.
@@ -64,15 +75,12 @@ export default function Landing() {
           </section>
         </AuroraBackground>
 
-        <section className="container mx-auto px-4 py-24 max-w-6xl">
+        <section className="container mx-auto px-4 py-16 md:py-24 max-w-6xl">
           <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
+            {...animationProps}
             className="grid md:grid-cols-3 gap-8"
           >
-            <div className="space-y-4 p-6 border rounded-lg">
+            <div className="space-y-4 p-6 border rounded-lg bg-card/50 backdrop-blur-sm">
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
                 <Lock className="h-6 w-6 text-primary" />
               </div>
@@ -82,7 +90,7 @@ export default function Landing() {
               </p>
             </div>
 
-            <div className="space-y-4 p-6 border rounded-lg">
+            <div className="space-y-4 p-6 border rounded-lg bg-card/50 backdrop-blur-sm">
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
                 <CheckCircle className="h-6 w-6 text-primary" />
               </div>
@@ -92,7 +100,7 @@ export default function Landing() {
               </p>
             </div>
 
-            <div className="space-y-4 p-6 border rounded-lg">
+            <div className="space-y-4 p-6 border rounded-lg bg-card/50 backdrop-blur-sm">
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
                 <Zap className="h-6 w-6 text-primary" />
               </div>
@@ -105,20 +113,17 @@ export default function Landing() {
         </section>
 
         <section className="border-t">
-          <div className="container mx-auto px-4 py-24 max-w-4xl text-center space-y-6">
+          <div className="container mx-auto px-4 py-16 md:py-24 max-w-4xl text-center space-y-6">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
+              {...animationProps}
             >
-              <h2 className="text-4xl font-bold tracking-tight mb-4">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
                 Ready to secure your next project?
               </h2>
-              <p className="text-xl text-muted-foreground mb-8">
+              <p className="text-lg md:text-xl text-muted-foreground mb-8">
                 Join thousands of freelancers and clients who trust Bond for blockchain escrow.
               </p>
-              <Button size="lg" onClick={() => navigate("/auth")}>
+              <Button size="lg" onClick={() => navigate("/auth")} className="w-full md:w-auto">
                 Get Started Now
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
